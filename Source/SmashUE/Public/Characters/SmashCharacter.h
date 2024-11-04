@@ -11,6 +11,8 @@ class SMASHUE_API ASmashCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+#pragma region UnrealDefaults
+
 public:
 	ASmashCharacter();
 
@@ -21,4 +23,21 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+#pragma endregion
+
+#pragma region Orient
+
+public:
+	float GetOrientX() const;
+
+	void SetOrientX(float NewOrientX);
+
+protected:
+	UPROPERTY(BlueprintReadOnly)
+	float OrientX = 1.0f;
+
+	void RotateMeshUsingOrientX() const;
+
+#pragma endregion
 };
