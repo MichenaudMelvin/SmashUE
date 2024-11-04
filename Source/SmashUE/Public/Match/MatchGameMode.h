@@ -21,18 +21,6 @@ protected:
 	UPROPERTY()
 	TArray<ASmashCharacter*> CharactersInsideArena;
 
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<ASmashCharacter> SmashCharacterClassP0;
-
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<ASmashCharacter> SmashCharacterClassP1;
-
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<ASmashCharacter> SmashCharacterClassP2;
-
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<ASmashCharacter> SmashCharacterClassP3;
-
 private:
 	void FindPlayerStartActorsInArena(TArray<AArenaPlayerStart*>& ResultActors);
 
