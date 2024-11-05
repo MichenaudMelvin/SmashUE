@@ -19,3 +19,7 @@ void USmashCharacterState::StateInit(USmashCharacterStateMachine* InStateMachine
 	StateMachine = InStateMachine;
 	Character = InStateMachine->GetCharacter();
 }
+
+void USmashCharacterState::StateEnter(ESmashCharacterStateID PreviousStateID) {}
+
+void USmashCharacterState::StateExit(ESmashCharacterStateID NextStateID) {}
