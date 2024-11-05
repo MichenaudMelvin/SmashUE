@@ -21,3 +21,10 @@ void USmashCharacterStateIdle::StateExit(ESmashCharacterStateID NextStateID)
 
 	UE_LOG(LogTemp, Warning, TEXT("Exit StateIdle"));
 }
+
+void USmashCharacterStateIdle::StateTick(float DeltaTime)
+{
+	Super::StateTick(DeltaTime);
+
+	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Yellow, TEXT("Tick StateIdle"));
+}
