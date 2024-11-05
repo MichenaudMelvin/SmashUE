@@ -2,7 +2,7 @@
 
 
 #include "Characters/SmashCharacter.h"
-
+#include "Characters/SmashCharacterStateMachine.h"
 
 ASmashCharacter::ASmashCharacter()
 {
@@ -12,7 +12,9 @@ ASmashCharacter::ASmashCharacter()
 void ASmashCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	CreateStateMachine();
+	InitStateMachine();
 }
 
 void ASmashCharacter::Tick(float DeltaTime)
@@ -42,5 +44,20 @@ void ASmashCharacter::RotateMeshUsingOrientX() const
 	FRotator Rotation = GetMesh()->GetRelativeRotation();
 	Rotation.Yaw = -90.0f * OrientX;
 	GetMesh()->SetRelativeRotation(Rotation);
+}
+
+void ASmashCharacter::CreateStateMachine()
+{
+	StateMachine = NewObject<USmashCharacterStateMachine>();
+}
+
+void ASmashCharacter::InitStateMachine()
+{
+	if(StateMachine == nullptr)
+	{
+		return;
+	}
+
+	StateMachine->Init(this);
 }
 
