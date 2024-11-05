@@ -5,6 +5,8 @@
 #include "Characters/SmashCharacterStateMachine.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Characters/SmashCharacterInputData.h"
+#include "EnhancedInputComponent.h"
 
 ASmashCharacter::ASmashCharacter()
 {
@@ -32,6 +34,15 @@ void ASmashCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	SetupMappingContextIntoController();
+
+	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent);
+
+	if(EnhancedInputComponent == nullptr)
+	{
+		return;
+	}
+
+	BindInputMoveXAxisAndActions(EnhancedInputComponent);
 }
 
 float ASmashCharacter::GetOrientX() const
@@ -76,12 +87,6 @@ void ASmashCharacter::TickStateMachine(float DeltaTime) const
 	StateMachine->Tick(DeltaTime);
 }
 
-void ASmashCharacter::Move(float Speed)
-{
-	float Scale = Speed / GetCharacterMovement()->MaxWalkSpeed;
-	AddMovementInput(GetActorForwardVector() * OrientX, Scale, true);
-}
-
 void ASmashCharacter::SetupMappingContextIntoController() const
 {
 	APlayerController* PlayerController = Cast<APlayerController>(Controller);
@@ -105,4 +110,46 @@ void ASmashCharacter::SetupMappingContextIntoController() const
 	}
 
 	InputSystem->AddMappingContext(InputMappingContext, 0);
+}
+
+float ASmashCharacter::GetInputMoveX() const
+{
+	return InputMoveX;
+}
+
+void ASmashCharacter::BindInputMoveXAxisAndActions(UEnhancedInputComponent* EnhancedInputComponent)
+{
+	if(InputData == nullptr)
+	{
+		return;
+	}
+
+	if(InputData->InputActionMoveX)
+	{
+		EnhancedInputComponent->BindAction(
+			InputData->InputActionMoveX,
+			ETriggerEvent::Started,
+			this,
+			&ASmashCharacter::OnInputMoveX
+		);
+
+		EnhancedInputComponent->BindAction(
+			InputData->InputActionMoveX,
+			ETriggerEvent::Completed,
+			this,
+			&ASmashCharacter::OnInputMoveX
+		);
+
+		EnhancedInputComponent->BindAction(
+			InputData->InputActionMoveX,
+			ETriggerEvent::Triggered,
+			this,
+			&ASmashCharacter::OnInputMoveX
+		);
+	}
+}
+
+void ASmashCharacter::OnInputMoveX(const FInputActionValue& InputActionValue)
+{
+	InputMoveX = InputActionValue.Get<float>();
 }

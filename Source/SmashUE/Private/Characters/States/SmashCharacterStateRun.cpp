@@ -3,6 +3,7 @@
 
 #include "Characters/States/SmashCharacterStateRun.h"
 #include "Characters/SmashCharacter.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 ESmashCharacterStateID USmashCharacterStateRun::GetStateID()
 {
@@ -12,6 +13,8 @@ ESmashCharacterStateID USmashCharacterStateRun::GetStateID()
 void USmashCharacterStateRun::StateEnter(ESmashCharacterStateID PreviousStateID)
 {
 	Super::StateEnter(PreviousStateID);
+
+	Character->GetCharacterMovement()->MaxWalkSpeed = RunMoveSpeedMax;
 
 	UE_LOG(LogTemp, Warning, TEXT("Enter StateRun"));
 }
@@ -26,8 +29,6 @@ void USmashCharacterStateRun::StateExit(ESmashCharacterStateID NextStateID)
 void USmashCharacterStateRun::StateTick(float DeltaTime)
 {
 	Super::StateTick(DeltaTime);
-
-	Character->Move(RunMoveSpeedMax);
 
 	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Yellow, TEXT("Tick StateRun"));
 }
