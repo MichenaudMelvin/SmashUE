@@ -4,10 +4,12 @@
 #include "SmashCharacterState.h"
 #include "Characters/SmashCharacterStateMachine.h"
 #include "Characters/SmashCharacter.h"
+#include "Characters/SmashCharacterSettings.h"
 
 USmashCharacterState::USmashCharacterState()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+	CharacterSettings = GetDefault<USmashCharacterSettings>();
 }
 
 ESmashCharacterStateID USmashCharacterState::GetStateID()

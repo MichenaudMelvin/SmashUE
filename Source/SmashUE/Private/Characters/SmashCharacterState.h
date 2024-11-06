@@ -7,6 +7,7 @@
 #include "Components/ActorComponent.h"
 #include "SmashCharacterState.generated.h"
 
+class USmashCharacterSettings;
 class USmashCharacterStateMachine;
 class ASmashCharacter;
 
@@ -37,4 +38,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Animation")
 	TObjectPtr<UAnimMontage> StateAnimation;
+
+	UPROPERTY()
+	const USmashCharacterSettings* CharacterSettings;
 };

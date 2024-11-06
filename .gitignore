@@ -34,6 +34,7 @@
 # Visual studio files
 .vs/
 *.vsconfig
+*sln.DotSettings.user
 
 #Localization files
 **/*[Ll]ocalization/**/*.csv

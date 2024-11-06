@@ -21,6 +21,9 @@ public:
 
 	virtual void StateTick(float DeltaTime) override;
 
+	UFUNCTION()
+	void OnInputMoveXFast(float InputMoveX);
+
 protected:
 	UPROPERTY(EditAnywhere, Category = "Movement", meta = (ClampMin = 0.0f, ForceUnits = "cm/s"))
 	float MoveSpeedMax = 250.0f;
