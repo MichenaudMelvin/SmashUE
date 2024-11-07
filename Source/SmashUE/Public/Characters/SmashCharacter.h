@@ -83,6 +83,8 @@ protected:
 public:
 	float GetInputMoveX() const;
 
+	bool GetInputJump() const;
+
 	UPROPERTY()
 	FInputMoveXEvent InputMoveXFastEvent;
 
@@ -90,12 +92,16 @@ protected:
 	UPROPERTY()
 	float InputMoveX = 0.0f;
 
+	bool bInputJump = false;
+
 private:
 	void BindInputMoveXAxisAndActions(UEnhancedInputComponent* EnhancedInputComponent);
 
 	void OnInputMoveX(const FInputActionValue& InputActionValue);
 
 	void OnInputMoveXFast(const FInputActionValue& InputActionValue);
+
+	void OnInputJump(const FInputActionValue& InputActionValue);
 
 #pragma endregion
 };

@@ -19,6 +19,8 @@ class SMASHUE_API USmashCharacterState : public UActorComponent
 public:
 	USmashCharacterState();
 
+	virtual void BeginPlay() override;
+
 	virtual ESmashCharacterStateID GetStateID();
 
 	virtual void StateInit(USmashCharacterStateMachine* InStateMachine);

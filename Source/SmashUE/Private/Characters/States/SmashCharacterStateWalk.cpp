@@ -32,7 +32,19 @@ void USmashCharacterStateWalk::StateTick(float DeltaTime)
 {
 	Super::StateTick(DeltaTime);
 
-	if(FMath::Abs(Character->GetInputMoveX()) < CharacterSettings->InputMoveXThreshold)
+	const bool bIsFalling = Character->GetCharacterMovement()->IsFalling();
+
+	if(Character->GetInputJump() && !bIsFalling)
+	{
+		StateMachine->ChangeState(ESmashCharacterStateID::Jump);
+	}
+
+	else if(bIsFalling)
+	{
+		StateMachine->ChangeState(ESmashCharacterStateID::Fall);
+	}
+
+	else if(FMath::Abs(Character->GetInputMoveX()) < CharacterSettings->InputMoveXThreshold)
 	{
 		StateMachine->ChangeState(ESmashCharacterStateID::Idle);
 	}

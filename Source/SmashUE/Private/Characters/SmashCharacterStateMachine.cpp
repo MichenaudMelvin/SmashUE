@@ -21,6 +21,8 @@ void USmashCharacterStateMachine::Tick(float DeltaTime)
 		return;
 	}
 
+	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Yellow, FString::Printf(TEXT("CurrentStateID: %hhd"), CurrentStateID));
+
 	CurrentState->StateTick(DeltaTime);
 }
 

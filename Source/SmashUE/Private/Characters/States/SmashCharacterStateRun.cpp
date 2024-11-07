@@ -17,22 +17,30 @@ void USmashCharacterStateRun::StateEnter(ESmashCharacterStateID PreviousStateID)
 	Super::StateEnter(PreviousStateID);
 
 	Character->GetCharacterMovement()->MaxWalkSpeed = RunMoveSpeedMax;
-
-	UE_LOG(LogTemp, Warning, TEXT("Enter StateRun"));
 }
 
 void USmashCharacterStateRun::StateExit(ESmashCharacterStateID NextStateID)
 {
 	Super::StateExit(NextStateID);
-
-	UE_LOG(LogTemp, Warning, TEXT("Exit StateRun"));
 }
 
 void USmashCharacterStateRun::StateTick(float DeltaTime)
 {
 	Super::StateTick(DeltaTime);
 
-	if(FMath::Abs(Character->GetInputMoveX()) < CharacterSettings->InputMoveXThreshold)
+	const bool bIsFalling = Character->GetCharacterMovement()->IsFalling();
+
+	if(Character->GetInputJump() && !bIsFalling)
+	{
+		StateMachine->ChangeState(ESmashCharacterStateID::Jump);
+	}
+
+	else if(bIsFalling)
+	{
+		StateMachine->ChangeState(ESmashCharacterStateID::Fall);
+	}
+
+	else if(FMath::Abs(Character->GetInputMoveX()) < CharacterSettings->InputMoveXThreshold)
 	{
 		StateMachine->ChangeState(ESmashCharacterStateID::Idle);
 	}
