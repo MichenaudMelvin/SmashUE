@@ -11,7 +11,10 @@ void USmashCharacterStateJump::BeginPlay()
 {
 	Super::BeginPlay();
 
-	TargetJumpDuration = bUseAnimDuration ? StateAnimation->GetPlayLength() : JumpDuration;
+	float TargetJumpDuration = bUseAnimDuration ? StateAnimation->GetPlayLength() : JumpDuration;
+
+	JumpVelocity = (2.0 * JumpMaxHeight) / TargetJumpDuration;
+	JumpGravity = (-2.0 * JumpMaxHeight) / FMath::Pow(TargetJumpDuration, 2);
 }
 
 ESmashCharacterStateID USmashCharacterStateJump::GetStateID()
@@ -23,27 +26,24 @@ void USmashCharacterStateJump::StateEnter(ESmashCharacterStateID PreviousStateID
 {
 	Super::StateEnter(PreviousStateID);
 
-	JumpTimer = 0.0f;
 	Character->GetCharacterMovement()->MaxWalkSpeed = JumpWalkSpeed;
 	Character->GetCharacterMovement()->AirControl = JumpAirControl;
-	Character->GetCharacterMovement()->JumpZVelocity = JumpMaxHeight;
-	Character->JumpMaxHoldTime = TargetJumpDuration;
+	Character->GetCharacterMovement()->GravityScale = 0.0f;
+
+	Character->GetCharacterMovement()->Velocity.Z = JumpVelocity;
+	Character->GetCharacterMovement()->SetMovementMode(MOVE_Falling);
 }
 
 void USmashCharacterStateJump::StateExit(ESmashCharacterStateID NextStateID)
 {
 	Super::StateExit(NextStateID);
-
-	Character->StopJumping();
 }
 
 void USmashCharacterStateJump::StateTick(float DeltaTime)
 {
 	Super::StateTick(DeltaTime);
 
-	JumpTimer += DeltaTime;
-
-	Character->Jump();
+	Character->GetCharacterMovement()->Velocity.Z += JumpGravity * DeltaTime;
 
 	if(FMath::Abs(Character->GetInputMoveX()) > CharacterSettings->InputMoveXThreshold)
 	{
@@ -51,8 +51,9 @@ void USmashCharacterStateJump::StateTick(float DeltaTime)
 		Character->AddMovementInput(FVector::ForwardVector, Character->GetOrientX());
 	}
 
-	if(JumpTimer >= TargetJumpDuration)
+	if(!Character->GetInputJump() || Character->GetCharacterMovement()->Velocity.Z <= 0.0f)
 	{
+		Character->GetCharacterMovement()->Velocity.Z = 0.0f;
 		StateMachine->ChangeState(ESmashCharacterStateID::Fall);
 	}
 }

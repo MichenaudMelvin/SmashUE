@@ -16,9 +16,9 @@ void USmashCharacterStateFall::StateEnter(ESmashCharacterStateID PreviousStateID
 {
 	Super::StateEnter(PreviousStateID);
 
-	// Character->GetCharacterMovement()->MaxWalkSpeed = FallHorizontalMoveSpeed;
-	// Character->GetCharacterMovement()->AirControl = FallAirControl;
-	// Character->GetCharacterMovement()->GravityScale = FallGravityScale;
+	Character->GetCharacterMovement()->MaxWalkSpeed = FallHorizontalMoveSpeed;
+	Character->GetCharacterMovement()->AirControl = FallAirControl;
+	Character->GetCharacterMovement()->GravityScale = FallGravityScale;
 }
 
 void USmashCharacterStateFall::StateExit(ESmashCharacterStateID NextStateID)

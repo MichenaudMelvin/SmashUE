@@ -40,7 +40,7 @@ protected:
 	float JumpAirControl = 1.0f;
 
 private:
-	float JumpTimer = 0.0f;
+	float JumpVelocity;
 
-	float TargetJumpDuration;
+	float JumpGravity;
 };

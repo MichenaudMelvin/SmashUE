@@ -4,9 +4,10 @@
 #include "Characters/SmashCharacter.h"
 #include "Characters/SmashCharacterStateMachine.h"
 #include "EnhancedInputSubsystems.h"
-#include "GameFramework/CharacterMovementComponent.h"
 #include "Characters/SmashCharacterInputData.h"
 #include "EnhancedInputComponent.h"
+#include "Quaternion.h"
+#include "Kismet/KismetMathLibrary.h"
 
 ASmashCharacter::ASmashCharacter()
 {

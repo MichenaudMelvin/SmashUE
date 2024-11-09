@@ -10,17 +10,19 @@ ETriggerState UInputTriggerPressedFast::UpdateState_Implementation(const UEnhanc
 {
 	if(IsActuated(ModifiedValue))
 	{
-		if(!bAlreadyTriggered)
+		if(bAlreadyTriggered)
 		{
-			Timer += DeltaTime;
+			return ETriggerState::None;
+		}
 
-			if(ModifiedValue.GetMagnitudeSq() > PressedFastThreshold * PressedFastThreshold)
+		Timer += DeltaTime;
+
+		if(ModifiedValue.GetMagnitudeSq() > PressedFastThreshold * PressedFastThreshold)
+		{
+			if(Timer <= Delay)
 			{
-				if(Timer <= Delay)
-				{
-					bAlreadyTriggered = true;
-					return ETriggerState::Triggered;
-				}
+				bAlreadyTriggered = true;
+				return ETriggerState::Triggered;
 			}
 		}
 	}
