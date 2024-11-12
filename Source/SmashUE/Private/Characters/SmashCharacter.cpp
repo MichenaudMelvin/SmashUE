@@ -6,8 +6,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Characters/SmashCharacterInputData.h"
 #include "EnhancedInputComponent.h"
-#include "Quaternion.h"
-#include "Kismet/KismetMathLibrary.h"
+#include "Camera/CameraWorldSubsystem.h"
 
 ASmashCharacter::ASmashCharacter()
 {
@@ -20,6 +19,8 @@ void ASmashCharacter::BeginPlay()
 
 	CreateStateMachine();
 	InitStateMachine();
+
+	GetWorld()->GetSubsystem<UCameraWorldSubsystem>()->AddFollowTarget(this);
 }
 
 void ASmashCharacter::Tick(float DeltaTime)

@@ -11,6 +11,11 @@ void USmashCharacterStateJump::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if(StateAnimation == nullptr)
+	{
+		bUseAnimDuration = false;
+	}
+
 	float TargetJumpDuration = bUseAnimDuration ? StateAnimation->GetPlayLength() : JumpDuration;
 
 	JumpVelocity = (2.0 * JumpMaxHeight) / TargetJumpDuration;
