@@ -34,7 +34,7 @@ protected:
 
 	void TickUpdateCameraPosition(float DeltaTime);
 
-	UCameraComponent* FindCameraByTag(const FName& Tag) const;
+	void TickUpdateCameraZoom(float DeltaTime);
 
 #pragma endregion
 
@@ -48,6 +48,8 @@ public:
 	void AddFollowTarget(UObject* FollowTarget);
 
 	void RemoveFollowTarget(UObject* FollowTarget);
+
+	float CalculateGreatestDistanceBetweenTargets();
 
 #pragma endregion
 
@@ -75,9 +77,31 @@ protected:
 
 #pragma endregion
 
+#pragma region Zoom
+
+protected:
+	UPROPERTY()
+	float CameraZoomYMin = 0.0f;
+
+	UPROPERTY()
+	float CameraZoomYMax = 0.0f;
+
+	UPROPERTY()
+	float CameraZoomDistanceBetweenTargetsMin = 300.0f;
+
+	UPROPERTY()
+	float CameraZoomDistanceBetweenTargetsMax = 1500.0f;
+
+	UFUNCTION()
+	void InitCameraZoomParameters();
+
+#pragma endregion
+
 #pragma region Misc
 
 protected:
+	UCameraComponent* FindCameraByTag(const FName& Tag) const;
+
 	FVector CalculateAveragePositionBetweenTargets();
 
 #pragma endregion

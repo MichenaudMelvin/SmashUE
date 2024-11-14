@@ -5,6 +5,7 @@
 #include "Camera/CameraComponent.h"
 #include "Camera/CameraFollowTarget.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 
 void UCameraWorldSubsystem::PostInitialize()
 {
@@ -17,6 +18,8 @@ void UCameraWorldSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	CameraMain = FindCameraByTag(TEXT("CameraMain"));
 
 	AActor* CameraBoundsActor = FindCameraBoundsActor();
+	InitCameraZoomParameters();
+
 	if(CameraBoundsActor == nullptr)
 	{
 		return;
@@ -28,6 +31,7 @@ void UCameraWorldSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 void UCameraWorldSubsystem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	TickUpdateCameraZoom(DeltaTime);
 	TickUpdateCameraPosition(DeltaTime);
 }
 
@@ -41,35 +45,27 @@ void UCameraWorldSubsystem::TickUpdateCameraPosition(float DeltaTime)
 	FVector AveragePosition = CalculateAveragePositionBetweenTargets();
 	ClampCameraPositionIntoCameraBounds(AveragePosition);
 
-	FVector CurrentWorldLocation = CameraMain->GetComponentLocation();
-	FVector ForwardVector = CameraMain->GetForwardVector().GetAbs();
+	AveragePosition.Y = CameraMain->GetComponentLocation().Y;
 
-	CurrentWorldLocation *= ForwardVector;
-	AveragePosition *= (ForwardVector - 1).GetAbs();
-
-	CameraMain->SetWorldLocation(AveragePosition + CurrentWorldLocation);
+	CameraMain->SetWorldLocation(AveragePosition);
 }
 
-UCameraComponent* UCameraWorldSubsystem::FindCameraByTag(const FName& Tag) const
+void UCameraWorldSubsystem::TickUpdateCameraZoom(float DeltaTime)
 {
-	TArray<AActor*> FoundActors;
-	UGameplayStatics::GetAllActorsWithTag(this, Tag, FoundActors);
-
-#if WITH_EDITOR
-	if(FoundActors.Num() > 1)
+	if(CameraMain == nullptr)
 	{
-		const FString Message = FString::Printf(TEXT("More than one actors have the tag %s, only one is needed."), *Tag.ToString());
-
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, Message);
-		FMessageLog("BlueprintLog").Warning(FText::FromString(Message));
+		return;
 	}
-#endif
 
-	//todo if found zero actors
+	float GreatestDistanceBetweenTargets = CalculateGreatestDistanceBetweenTargets();
 
-	UActorComponent* FoundComp = FoundActors[0]->FindComponentByClass(UCameraComponent::StaticClass());
+	float Percent = UKismetMathLibrary::NormalizeToRange(GreatestDistanceBetweenTargets, CameraZoomDistanceBetweenTargetsMin, CameraZoomDistanceBetweenTargetsMax);
+	Percent = FMath::Clamp(Percent, 0.0f, 1.0f);
 
-	return Cast<UCameraComponent>(FoundComp);
+	FVector CurrentLocation = CameraMain->GetComponentLocation();
+	CurrentLocation.Y = FMath::Lerp(CameraZoomYMin, CameraZoomYMax, Percent);
+
+	CameraMain->SetWorldLocation(CurrentLocation);
 }
 
 void UCameraWorldSubsystem::AddFollowTarget(UObject* FollowTarget)
@@ -92,11 +88,67 @@ void UCameraWorldSubsystem::RemoveFollowTarget(UObject* FollowTarget)
 	FollowTargets.Remove(FollowTarget);
 }
 
+float UCameraWorldSubsystem::CalculateGreatestDistanceBetweenTargets()
+{
+	float GreatestDistance = 0.0f;
+
+	for (int i = 0; i < FollowTargets.Num(); i++)
+	{
+		UObject* TargetA = FollowTargets[i];
+		if(!TargetA->Implements<UCameraFollowTarget>())
+		{
+			continue;
+		}
+
+		ICameraFollowTarget* FollowTargetInterfaceA = Cast<ICameraFollowTarget>(TargetA);
+
+		if(!FollowTargetInterfaceA->IsFollowable())
+		{
+			continue;
+		}
+
+		for (int j = 0; j < FollowTargets.Num(); j++)
+		{
+			if(i == j)
+			{
+				continue;
+			}
+
+			UObject* TargetB = FollowTargets[j];
+			if(!TargetB->Implements<UCameraFollowTarget>())
+			{
+				continue;
+			}
+
+			ICameraFollowTarget* FollowTargetInterfaceB = Cast<ICameraFollowTarget>(TargetB);
+
+			if(!FollowTargetInterfaceB->IsFollowable())
+			{
+				continue;
+			}
+
+			float Distance = FVector::Dist(FollowTargetInterfaceA->GetFollowPosition(), FollowTargetInterfaceB->GetFollowPosition());
+
+			if(Distance > GreatestDistance)
+			{
+				GreatestDistance = Distance;
+			}
+		}
+	}
+
+	return GreatestDistance;
+}
+
 AActor* UCameraWorldSubsystem::FindCameraBoundsActor()
 {
 	TArray<AActor*> FoundActors;
 	FName Tag = "CameraBounds";
 	UGameplayStatics::GetAllActorsWithTag(this, Tag, FoundActors);
+
+	if(FoundActors.Num() == 0)
+	{
+		return nullptr;
+	}
 
 #if WITH_EDITOR
 	if(FoundActors.Num() > 1)
@@ -107,8 +159,6 @@ AActor* UCameraWorldSubsystem::FindCameraBoundsActor()
 		FMessageLog("BlueprintLog").Warning(FText::FromString(Message));
 	}
 #endif
-
-	//todo if found zero actors
 
 	return FoundActors[0];
 }
@@ -148,8 +198,6 @@ void UCameraWorldSubsystem::ClampCameraPositionIntoCameraBounds(FVector& Positio
 
 	Position.X = FMath::Clamp(Position.X, MinX, MaxX);
 	Position.Z = FMath::Clamp(Position.Z, MinY, MaxY);
-
-	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Cyan, FString::Printf(TEXT("Pos: %s"), *Position.ToString()));
 }
 
 void UCameraWorldSubsystem::GetViewportBounds(FVector2D& OutViewportBoundsMin, FVector2D& OutViewportBoundsMax)
@@ -212,6 +260,39 @@ FVector UCameraWorldSubsystem::CalculateWorldPositionFromViewportPosition(const 
 	WorldPosition += CameraWorldProjectDir * YDistanceToCenter;
 
 	return WorldPosition;
+}
+
+void UCameraWorldSubsystem::InitCameraZoomParameters()
+{
+	UCameraComponent* CameraDistanceMin = FindCameraByTag("CameraDistanceMin");
+	UCameraComponent* CameraDistanceMax = FindCameraByTag("CameraDistanceMax");
+	CameraZoomYMin = CameraDistanceMin == nullptr ? 0.0f : CameraDistanceMin->GetComponentLocation().Y;
+	CameraZoomYMax = CameraDistanceMax == nullptr ? 0.0f : CameraDistanceMax->GetComponentLocation().Y;
+}
+
+UCameraComponent* UCameraWorldSubsystem::FindCameraByTag(const FName& Tag) const
+{
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsWithTag(this, Tag, FoundActors);
+
+	if(FoundActors.Num() == 0)
+	{
+		return nullptr;
+	}
+
+#if WITH_EDITOR
+	if(FoundActors.Num() > 1)
+	{
+		const FString Message = FString::Printf(TEXT("More than one actors have the tag %s, only one is needed."), *Tag.ToString());
+
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, Message);
+		FMessageLog("BlueprintLog").Warning(FText::FromString(Message));
+	}
+#endif
+
+	UActorComponent* FoundComp = FoundActors[0]->FindComponentByClass(UCameraComponent::StaticClass());
+
+	return Cast<UCameraComponent>(FoundComp);
 }
 
 FVector UCameraWorldSubsystem::CalculateAveragePositionBetweenTargets()
