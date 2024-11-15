@@ -6,6 +6,7 @@
 #include "Subsystems/WorldSubsystem.h"
 #include "CameraWorldSubsystem.generated.h"
 
+class UCameraSettings;
 class UCameraComponent;
 
 UCLASS()
@@ -65,7 +66,7 @@ protected:
 	UPROPERTY()
 	float CameraBoundsYProjectionCenter;
 
-	AActor* FindCameraBoundsActor();
+	AActor* FindCameraBoundsActor(const FName& Tag);
 
 	void InitCameraBounds(AActor* CameraBoundsActor);
 
@@ -93,7 +94,7 @@ protected:
 	float CameraZoomDistanceBetweenTargetsMax = 1500.0f;
 
 	UFUNCTION()
-	void InitCameraZoomParameters();
+	void InitCameraZoomParameters(const UCameraSettings* CameraSettings);
 
 #pragma endregion
 

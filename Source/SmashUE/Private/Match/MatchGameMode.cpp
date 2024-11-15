@@ -65,8 +65,12 @@ void AMatchGameMode::SpawnCharacters(const TArray<AArenaPlayerStart*>& SpawnPoin
 	USmashCharacterInputData* InputData = LoadInputDataFromConfig();
 	UInputMappingContext* InputMappingContext = LoadInputMappingContextFromConfig();
 
-	for (AArenaPlayerStart* SpawnPoint : SpawnPoints)
+	//GetDefault<UArenaSettings>()->NumbersOfPlayers is temp
+	for(int i = 0; i < GetDefault<UArenaSettings>()->NumbersOfPlayers; i++)
+	// for (AArenaPlayerStart* SpawnPoint : SpawnPoints)
 	{
+		AArenaPlayerStart* SpawnPoint = SpawnPoints[i];
+
 		EAutoReceiveInput::Type InputType = SpawnPoint->AutoReceiveInput.GetValue();
 		TSubclassOf<ASmashCharacter> SmashCharacterClass = GetSmashCharacterClassFromInputType(InputType);
 
