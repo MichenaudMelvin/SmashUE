@@ -18,7 +18,6 @@ void USmashCharacterStateFall::StateEnter(ESmashCharacterStateID PreviousStateID
 
 	Character->GetCharacterMovement()->MaxWalkSpeed = FallHorizontalMoveSpeed;
 	Character->GetCharacterMovement()->AirControl = FallAirControl;
-	Character->GetCharacterMovement()->GravityScale = FallGravityScale;
 }
 
 void USmashCharacterStateFall::StateExit(ESmashCharacterStateID NextStateID)
@@ -30,10 +29,23 @@ void USmashCharacterStateFall::StateTick(float DeltaTime)
 {
 	Super::StateTick(DeltaTime);
 
-	if(FMath::Abs(Character->GetInputMoveX()) > CharacterSettings->InputMoveXThreshold)
+	const float MoveXValue = Character->GetInputMoveX();
+	const float MoveYValue = Character->GetInputMoveY();
+
+	UE_LOG(LogTemp, Warning, TEXT("MoveYValue: %f"), MoveYValue);
+
+	if(MoveYValue < -CharacterSettings->InputMoveXThreshold)
 	{
-		Character->SetOrientX(Character->GetInputMoveX());
-		Character->AddMovementInput(FVector::ForwardVector, Character->GetOrientX());
+		Character->GetCharacterMovement()->GravityScale = FallFastGravityScale;
+	}
+	else
+	{
+		Character->GetCharacterMovement()->GravityScale = FallGravityScale;
+	}
+
+	if(FMath::Abs(MoveXValue) > CharacterSettings->InputMoveXThreshold)
+	{
+		Character->AddMovementInput(FVector::ForwardVector, MoveXValue);
 	}
 
 	if(Character->GetCharacterMovement()->IsFalling())

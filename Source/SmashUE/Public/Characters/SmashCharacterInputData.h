@@ -14,12 +14,15 @@ class SMASHUE_API USmashCharacterInputData : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, Category = "Inputs")
+	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
 	TObjectPtr<UInputAction> InputActionMoveX;
 
-	UPROPERTY(EditAnywhere, Category = "Inputs")
+	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
 	TObjectPtr<UInputAction> InputActionMoveXFast;
 
-	UPROPERTY(EditAnywhere, Category = "Inputs")
+	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
+	TObjectPtr<UInputAction> InputActionMoveY;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
 	TObjectPtr<UInputAction> InputActionJump;
 };

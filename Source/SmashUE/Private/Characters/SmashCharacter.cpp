@@ -6,7 +6,9 @@
 #include "EnhancedInputSubsystems.h"
 #include "Characters/SmashCharacterInputData.h"
 #include "EnhancedInputComponent.h"
+#include "SmashCharacterState.h"
 #include "Camera/CameraWorldSubsystem.h"
+#include "Characters/SmashCharacterSettings.h"
 
 ASmashCharacter::ASmashCharacter()
 {
@@ -17,6 +19,7 @@ void ASmashCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	CreateStates();
 	CreateStateMachine();
 	InitStateMachine();
 
@@ -89,6 +92,46 @@ void ASmashCharacter::TickStateMachine(float DeltaTime) const
 	StateMachine->Tick(DeltaTime);
 }
 
+const TArray<USmashCharacterState*>& ASmashCharacter::GetStates() const
+{
+	return States;
+}
+
+void ASmashCharacter::CreateStates()
+{
+	const USmashCharacterSettings* CharacterSettings = GetDefault<USmashCharacterSettings>();
+
+	for (TTuple<ESmashCharacterStateID, TSubclassOf<USmashCharacterState>> State : CharacterSettings->CharacterStates)
+	{
+		if(State.Key == ESmashCharacterStateID::None)
+		{
+			continue;
+		}
+
+		USmashCharacterState* NewState = nullptr;
+
+		if(CharacterStates.Contains(State.Key))
+		{
+			const TSubclassOf<USmashCharacterState> Class = *CharacterStates.Find(State.Key);
+
+			if(Class != nullptr)
+			{
+				NewState = NewObject<USmashCharacterState>(this, Class);
+			}
+		}
+
+		if(NewState == nullptr)
+		{
+			if(State.Value != nullptr)
+			{
+				NewState = NewObject<USmashCharacterState>(this, State.Value);
+			}
+		}
+
+		States.Add(NewState);
+	}
+}
+
 void ASmashCharacter::SetupMappingContextIntoController() const
 {
 	APlayerController* PlayerController = Cast<APlayerController>(Controller);
@@ -117,6 +160,11 @@ void ASmashCharacter::SetupMappingContextIntoController() const
 float ASmashCharacter::GetInputMoveX() const
 {
 	return InputMoveX;
+}
+
+float ASmashCharacter::GetInputMoveY() const
+{
+	return InputMoveY;
 }
 
 bool ASmashCharacter::GetInputJump() const
@@ -165,6 +213,30 @@ void ASmashCharacter::BindInputMoveXAxisAndActions(UEnhancedInputComponent* Enha
 		);
 	}
 
+	if(InputData->InputActionMoveY)
+	{
+		EnhancedInputComponent->BindAction(
+			InputData->InputActionMoveY,
+			ETriggerEvent::Started,
+			this,
+			&ASmashCharacter::OnInputMoveY
+		);
+
+		EnhancedInputComponent->BindAction(
+			InputData->InputActionMoveY,
+			ETriggerEvent::Completed,
+			this,
+			&ASmashCharacter::OnInputMoveY
+		);
+
+		EnhancedInputComponent->BindAction(
+			InputData->InputActionMoveY,
+			ETriggerEvent::Triggered,
+			this,
+			&ASmashCharacter::OnInputMoveY
+		);
+	}
+
 	if(InputData->InputActionJump)
 	{
 		EnhancedInputComponent->BindAction(
@@ -193,6 +265,11 @@ void ASmashCharacter::BindInputMoveXAxisAndActions(UEnhancedInputComponent* Enha
 void ASmashCharacter::OnInputMoveX(const FInputActionValue& InputActionValue)
 {
 	InputMoveX = InputActionValue.Get<float>();
+}
+
+void ASmashCharacter::OnInputMoveY(const FInputActionValue& InputActionValue)
+{
+	InputMoveY = InputActionValue.Get<float>();
 }
 
 void ASmashCharacter::OnInputMoveXFast(const FInputActionValue& InputActionValue)

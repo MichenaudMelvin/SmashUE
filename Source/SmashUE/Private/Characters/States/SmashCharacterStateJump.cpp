@@ -7,9 +7,14 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Characters/SmashCharacterSettings.h"
 
-void USmashCharacterStateJump::BeginPlay()
+ESmashCharacterStateID USmashCharacterStateJump::GetStateID()
 {
-	Super::BeginPlay();
+	return ESmashCharacterStateID::Jump;
+}
+
+void USmashCharacterStateJump::StateInit(USmashCharacterStateMachine* InStateMachine)
+{
+	Super::StateInit(InStateMachine);
 
 	if(StateAnimation == nullptr)
 	{
@@ -20,11 +25,6 @@ void USmashCharacterStateJump::BeginPlay()
 
 	JumpVelocity = (2.0 * JumpMaxHeight) / TargetJumpDuration;
 	JumpGravity = (-2.0 * JumpMaxHeight) / FMath::Pow(TargetJumpDuration, 2);
-}
-
-ESmashCharacterStateID USmashCharacterStateJump::GetStateID()
-{
-	return ESmashCharacterStateID::Jump;
 }
 
 void USmashCharacterStateJump::StateEnter(ESmashCharacterStateID PreviousStateID)
@@ -50,10 +50,11 @@ void USmashCharacterStateJump::StateTick(float DeltaTime)
 
 	Character->GetCharacterMovement()->Velocity.Z += JumpGravity * DeltaTime;
 
-	if(FMath::Abs(Character->GetInputMoveX()) > CharacterSettings->InputMoveXThreshold)
+	const float MoveXValue = Character->GetInputMoveX();
+
+	if(FMath::Abs(MoveXValue) > CharacterSettings->InputMoveXThreshold)
 	{
-		Character->SetOrientX(Character->GetInputMoveX());
-		Character->AddMovementInput(FVector::ForwardVector, Character->GetOrientX());
+		Character->AddMovementInput(FVector::ForwardVector, MoveXValue);
 	}
 
 	if(!Character->GetInputJump() || Character->GetCharacterMovement()->Velocity.Z <= 0.0f)
@@ -62,3 +63,20 @@ void USmashCharacterStateJump::StateTick(float DeltaTime)
 		StateMachine->ChangeState(ESmashCharacterStateID::Fall);
 	}
 }
+
+#if WITH_EDITOR
+void USmashCharacterStateJump::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+
+	const FName& PropertyName = PropertyChangedEvent.GetMemberPropertyName();
+
+	if (PropertyName == GET_MEMBER_NAME_CHECKED(USmashCharacterStateJump, bUseAnimDuration) || PropertyName == GET_MEMBER_NAME_CHECKED(USmashCharacterStateJump, StateAnimation))
+	{
+		if(bUseAnimDuration && StateAnimation != nullptr)
+		{
+			JumpDuration = StateAnimation->GetPlayLength();
+		}
+	}
+}
+#endif

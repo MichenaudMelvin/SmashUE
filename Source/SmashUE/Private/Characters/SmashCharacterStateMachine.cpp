@@ -21,8 +21,6 @@ void USmashCharacterStateMachine::Tick(float DeltaTime)
 		return;
 	}
 
-	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Yellow, FString::Printf(TEXT("CurrentStateID: %hhd"), CurrentStateID));
-
 	CurrentState->StateTick(DeltaTime);
 }
 
@@ -72,11 +70,8 @@ USmashCharacterState* USmashCharacterStateMachine::GetState(ESmashCharacterState
 
 void USmashCharacterStateMachine::FindStates()
 {
-	TArray<UActorComponent*> FoundComponents = Character->K2_GetComponentsByClass(USmashCharacterState::StaticClass());
-
-	for (UActorComponent* StateComponent : FoundComponents)
+	for (USmashCharacterState* State : Character->GetStates())
 	{
-		USmashCharacterState* State = Cast<USmashCharacterState>(StateComponent);
 		if(State == nullptr)
 		{
 			continue;

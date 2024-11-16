@@ -11,16 +11,12 @@ class USmashCharacterSettings;
 class USmashCharacterStateMachine;
 class ASmashCharacter;
 
-UCLASS(Abstract)
-class SMASHUE_API USmashCharacterState : public UActorComponent
+UCLASS(Abstract, Blueprintable)
+class SMASHUE_API USmashCharacterState : public UObject
 {
 	GENERATED_BODY()
 
 public:
-	USmashCharacterState();
-
-	virtual void BeginPlay() override;
-
 	virtual ESmashCharacterStateID GetStateID();
 
 	virtual void StateInit(USmashCharacterStateMachine* InStateMachine);

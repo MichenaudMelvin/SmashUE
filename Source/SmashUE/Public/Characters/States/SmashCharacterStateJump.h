@@ -13,15 +13,19 @@ class SMASHUE_API USmashCharacterStateJump : public USmashCharacterState
 	GENERATED_BODY()
 
 public:
-	virtual void BeginPlay() override;
-
 	virtual ESmashCharacterStateID GetStateID() override;
+
+	virtual void StateInit(USmashCharacterStateMachine* InStateMachine) override;
 
 	virtual void StateEnter(ESmashCharacterStateID PreviousStateID) override;
 
 	virtual void StateExit(ESmashCharacterStateID NextStateID) override;
 
 	virtual void StateTick(float DeltaTime) override;
+
+#if WITH_EDITOR
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "Jump", meta = (ClampMin = 0.0f))
@@ -40,7 +44,9 @@ protected:
 	float JumpAirControl = 1.0f;
 
 private:
+	UPROPERTY()
 	float JumpVelocity;
 
+	UPROPERTY()
 	float JumpGravity;
 };

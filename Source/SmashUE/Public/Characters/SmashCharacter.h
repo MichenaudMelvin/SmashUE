@@ -8,6 +8,8 @@
 #include "GameFramework/Character.h"
 #include "SmashCharacter.generated.h"
 
+enum class ESmashCharacterStateID : uint8;
+class USmashCharacterState;
 class USmashCharacterInputData;
 class UInputMappingContext;
 class USmashCharacterStateMachine;
@@ -59,9 +61,19 @@ public:
 
 	void TickStateMachine(float DeltaTime) const;
 
+	const TArray<USmashCharacterState*>& GetStates() const;
+
 protected:
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "StateMachine")
 	TObjectPtr<USmashCharacterStateMachine> StateMachine;
+
+	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly, Category = "States")
+	TArray<USmashCharacterState*> States;
+
+	UPROPERTY(EditDefaultsOnly, Category = "States")
+	TMap<ESmashCharacterStateID, TSubclassOf<USmashCharacterState>> CharacterStates;
+
+	void CreateStates();
 
 #pragma endregion
 
@@ -79,10 +91,12 @@ protected:
 
 #pragma endregion
 
-#pragma region InputMoveX
+#pragma region Inputs
 
 public:
 	float GetInputMoveX() const;
+
+	float GetInputMoveY() const;
 
 	bool GetInputJump() const;
 
@@ -93,12 +107,17 @@ protected:
 	UPROPERTY()
 	float InputMoveX = 0.0f;
 
+	UPROPERTY()
+	float InputMoveY = 0.0f;
+
 	bool bInputJump = false;
 
 private:
 	void BindInputMoveXAxisAndActions(UEnhancedInputComponent* EnhancedInputComponent);
 
 	void OnInputMoveX(const FInputActionValue& InputActionValue);
+
+	void OnInputMoveY(const FInputActionValue& InputActionValue);
 
 	void OnInputMoveXFast(const FInputActionValue& InputActionValue);
 

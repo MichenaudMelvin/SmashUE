@@ -6,18 +6,6 @@
 #include "Characters/SmashCharacter.h"
 #include "Characters/SmashCharacterSettings.h"
 
-USmashCharacterState::USmashCharacterState()
-{
-	PrimaryComponentTick.bCanEverTick = false;
-}
-
-void USmashCharacterState::BeginPlay()
-{
-	Super::BeginPlay();
-
-	CharacterSettings = GetDefault<USmashCharacterSettings>();
-}
-
 ESmashCharacterStateID USmashCharacterState::GetStateID()
 {
 	return ESmashCharacterStateID::None;
@@ -27,6 +15,7 @@ void USmashCharacterState::StateInit(USmashCharacterStateMachine* InStateMachine
 {
 	StateMachine = InStateMachine;
 	Character = InStateMachine->GetCharacter();
+	CharacterSettings = GetDefault<USmashCharacterSettings>();
 }
 
 void USmashCharacterState::StateEnter(ESmashCharacterStateID PreviousStateID)
