@@ -32,8 +32,6 @@ void USmashCharacterStateFall::StateTick(float DeltaTime)
 	const float MoveXValue = Character->GetInputMoveX();
 	const float MoveYValue = Character->GetInputMoveY();
 
-	UE_LOG(LogTemp, Warning, TEXT("MoveYValue: %f"), MoveYValue);
-
 	if(MoveYValue < -CharacterSettings->InputMoveXThreshold)
 	{
 		Character->GetCharacterMovement()->GravityScale = FallFastGravityScale;

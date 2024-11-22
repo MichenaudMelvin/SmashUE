@@ -3,16 +3,17 @@
 
 #include "Characters/SmashCharacter.h"
 #include "Characters/SmashCharacterStateMachine.h"
-#include "EnhancedInputSubsystems.h"
 #include "Characters/SmashCharacterInputData.h"
 #include "EnhancedInputComponent.h"
 #include "SmashCharacterState.h"
 #include "Camera/CameraWorldSubsystem.h"
 #include "Characters/SmashCharacterSettings.h"
+#include "Components/CapsuleComponent.h"
 
 ASmashCharacter::ASmashCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 }
 
 void ASmashCharacter::BeginPlay()
@@ -37,8 +38,6 @@ void ASmashCharacter::Tick(float DeltaTime)
 void ASmashCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	SetupMappingContextIntoController();
 
 	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent);
 
@@ -130,31 +129,6 @@ void ASmashCharacter::CreateStates()
 
 		States.Add(NewState);
 	}
-}
-
-void ASmashCharacter::SetupMappingContextIntoController() const
-{
-	APlayerController* PlayerController = Cast<APlayerController>(Controller);
-
-	if(PlayerController == nullptr)
-	{
-		return;
-	}
-
-	ULocalPlayer* Player =  PlayerController->GetLocalPlayer();
-
-	if(Player == nullptr)
-	{
-		return;
-	}
-
-	 UEnhancedInputLocalPlayerSubsystem* InputSystem = Player->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
-	if(InputSystem == nullptr)
-	{
-		return;
-	}
-
-	InputSystem->AddMappingContext(InputMappingContext, 0);
 }
 
 float ASmashCharacter::GetInputMoveX() const

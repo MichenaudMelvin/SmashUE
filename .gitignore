@@ -25,6 +25,7 @@
 !**/*[Bb]inaries/Win64/SmashUEEditor.target
 !**/*[Bb]inaries/Win64/UnrealEditor.modules
 !**/*[Bb]inaries/Win64/UnrealEditor-SmashUE.dll
+!**/*[Bb]inaries/Win64/UnrealEditor-LocalMultiplayer.dll
 
 # VSCode files
 .vscode/

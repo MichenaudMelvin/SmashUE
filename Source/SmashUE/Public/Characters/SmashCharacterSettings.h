@@ -21,9 +21,6 @@ public:
 	UPROPERTY(Config, EditDefaultsOnly, Category = "Inputs")
 	TSoftObjectPtr<USmashCharacterInputData> InputData;
 
-	UPROPERTY(Config, EditDefaultsOnly, Category = "Inputs")
-	TSoftObjectPtr<UInputMappingContext> InputMappingContext;
-
 	UPROPERTY(Config, EditDefaultsOnly, Category = "Inputs", meta = (ClampMin = 0.0f, ClampMax = 1.0f, UIMin = 0.0f, UIMax = 1.0f))
 	float InputMoveXThreshold = 0.1f;
 

@@ -41,7 +41,6 @@ public:
 public:
 	float GetOrientX() const;
 
-	UFUNCTION(BlueprintCallable) // temp
 	void SetOrientX(float NewOrientX);
 
 protected:
@@ -85,9 +84,6 @@ public:
 
 	UPROPERTY()
 	TObjectPtr<USmashCharacterInputData> InputData;
-
-protected:
-	void SetupMappingContextIntoController() const;
 
 #pragma endregion
 
