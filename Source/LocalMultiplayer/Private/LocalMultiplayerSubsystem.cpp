@@ -11,7 +11,8 @@ void ULocalMultiplayerSubsystem::CreateAndInitPlayers(ELocalMultiplayerInputMapp
 	const ULocalMultiplayerSettings* Settings = GetDefault<ULocalMultiplayerSettings>();
 	int NBControllers = Settings->GetNBKeyboardProfiles() + Settings->NBMaxGamepads;
 
-	for (int i = 0; i < Settings->GetNBKeyboardProfiles(); i++)
+	int CurrentPlayerNumber = UGameplayStatics::GetNumLocalPlayerControllers(this);
+	for (int i = CurrentPlayerNumber; i < Settings->GetNBKeyboardProfiles(); i++)
 	{
 		UGameplayStatics::CreatePlayer(this, i, true);
 	}
@@ -64,7 +65,7 @@ void ULocalMultiplayerSubsystem::AssignKeyboardMapping(int PlayerIndex, int Keyb
 	const ULocalMultiplayerSettings* Settings = GetDefault<ULocalMultiplayerSettings>();
 	UInputMappingContext* MappingContext = Settings->KeyboardProfilesData[KeyboardProfileIndex].GetIMCFromType(MappingType);
 
-	FModifyContextOptions ContextOptions;
+	FModifyContextOptions ContextOptions = FModifyContextOptions();
 	ContextOptions.bForceImmediately = true;
 	Subsystem->AddMappingContext(MappingContext, 0, ContextOptions);
 }
@@ -77,13 +78,13 @@ int ULocalMultiplayerSubsystem::GetAssignedPlayerIndexFromGamepadDeviceID(int De
 
 int ULocalMultiplayerSubsystem::AssignNewPlayerToGamepadDeviceID(int DeviceID)
 {
-	if(PlayerIndexFromKeyboardProfileIndex.Contains(DeviceID))
+	if(PlayerIndexFromGamepadProfileIndex.Contains(DeviceID))
 	{
 		return INDEX_NONE;
 	}
 
 	int PlayerIndex = LastAssignedPlayerIndex;
-	PlayerIndexFromKeyboardProfileIndex.Add(DeviceID, PlayerIndex);
+	PlayerIndexFromGamepadProfileIndex.Add(DeviceID, PlayerIndex);
 	LastAssignedPlayerIndex++;
 	return PlayerIndex;
 }
@@ -111,7 +112,7 @@ void ULocalMultiplayerSubsystem::AssignGamepadInputMapping(int PlayerIndex, ELoc
 	const ULocalMultiplayerSettings* Settings = GetDefault<ULocalMultiplayerSettings>();
 	UInputMappingContext* MappingContext = Settings->GamepadProfileData.GetIMCFromType(MappingType);
 
-	FModifyContextOptions ContextOptions;
+	FModifyContextOptions ContextOptions = FModifyContextOptions();
 	ContextOptions.bForceImmediately = true;
 	Subsystem->AddMappingContext(MappingContext, 0, ContextOptions);
 }

@@ -27,6 +27,8 @@ public:
 
 	virtual void StateTick(float DeltaTime);
 
+	virtual void PlayStateAnimation();
+
 protected:
 	UPROPERTY()
 	TObjectPtr<ASmashCharacter> Character;
@@ -34,9 +36,14 @@ protected:
 	UPROPERTY()
 	TObjectPtr<USmashCharacterStateMachine> StateMachine;
 
-	UPROPERTY(EditAnywhere, Category = "Animation")
+	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 	TObjectPtr<UAnimMontage> StateAnimation;
 
 	UPROPERTY()
 	const USmashCharacterSettings* CharacterSettings;
+
+#if WITH_EDITORONLY_DATA
+	UPROPERTY(EditDefaultsOnly, Category = "Debug", meta = (ToolTip = "Enable debug features for the current state"))
+	bool bDebugState = false;
+#endif
 };

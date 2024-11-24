@@ -56,6 +56,22 @@ float ASmashCharacter::GetOrientX() const
 
 void ASmashCharacter::SetOrientX(float NewOrientX)
 {
+	if(GetDefault<USmashCharacterSettings>()->b2DOrient)
+	{
+		if(NewOrientX > 0.0f)
+		{
+			NewOrientX = 1;
+		}
+		else if(NewOrientX < 0.0f)
+		{
+			NewOrientX = -1.0;
+		}
+		else
+		{
+			NewOrientX = 1;
+		}
+	}
+
 	OrientX = NewOrientX;
 }
 
@@ -228,11 +244,11 @@ void ASmashCharacter::BindInputMoveXAxisAndActions(UEnhancedInputComponent* Enha
 		);
 
 		EnhancedInputComponent->BindAction(
-		InputData->InputActionJump,
-		ETriggerEvent::Completed,
-		this,
-		&ASmashCharacter::OnInputJump
-	);
+			InputData->InputActionJump,
+			ETriggerEvent::Completed,
+			this,
+			&ASmashCharacter::OnInputJump
+		);
 	}
 }
 

@@ -19,24 +19,29 @@ bool ULocalMultiplayerGameViewportClient::InputKey(const FInputKeyEventArgs& Eve
 	ULocalMultiplayerSubsystem* Subsystem = GameInstance->GetSubsystem<ULocalMultiplayerSubsystem>();
 	const ULocalMultiplayerSettings* Settings = GetDefault<ULocalMultiplayerSettings>();
 
-	int KeyboardProfileIndex = Settings->FindKeyboardProfileIndexFromKey(EventArgs.Key, ELocalMultiplayerInputMappingType::InGame);
+	int PlayerIndex = INDEX_NONE;
 
-	if(KeyboardProfileIndex == INDEX_NONE)
+	if(EventArgs.IsGamepad())
 	{
-		return Super::InputKey(EventArgs);
-	}
+		PlayerIndex = Subsystem->GetAssignedPlayerIndexFromGamepadDeviceID(EventArgs.ControllerId);
 
-	int PlayerIndex = EventArgs.IsGamepad() ? Subsystem->GetAssignedPlayerIndexFromGamepadDeviceID(EventArgs.ControllerId)
-											: Subsystem->GetAssignedPlayerIndexFromKeyboardProfileIndex(KeyboardProfileIndex);
-
-	if(PlayerIndex == INDEX_NONE)
-	{
-		if(EventArgs.IsGamepad())
+		if(PlayerIndex == INDEX_NONE)
 		{
 			PlayerIndex = Subsystem->AssignNewPlayerToGamepadDeviceID(EventArgs.ControllerId);
 			Subsystem->AssignGamepadInputMapping(PlayerIndex, ELocalMultiplayerInputMappingType::InGame);
 		}
-		else
+	}
+	else
+	{
+		int KeyboardProfileIndex = Settings->FindKeyboardProfileIndexFromKey(EventArgs.Key, ELocalMultiplayerInputMappingType::InGame);
+		if(KeyboardProfileIndex == INDEX_NONE)
+		{
+			return Super::InputKey(EventArgs);
+		}
+
+		PlayerIndex = Subsystem->GetAssignedPlayerIndexFromKeyboardProfileIndex(KeyboardProfileIndex);
+
+		if(PlayerIndex == INDEX_NONE)
 		{
 			PlayerIndex = Subsystem->AssignNewPlayerToKeyboardProfile(KeyboardProfileIndex);
 			Subsystem->AssignKeyboardMapping(PlayerIndex, KeyboardProfileIndex, ELocalMultiplayerInputMappingType::InGame);
@@ -59,27 +64,29 @@ bool ULocalMultiplayerGameViewportClient::InputAxis(FViewport* InViewport, FInpu
 	ULocalMultiplayerSubsystem* Subsystem = GameInstance->GetSubsystem<ULocalMultiplayerSubsystem>();
 	const ULocalMultiplayerSettings* Settings = GetDefault<ULocalMultiplayerSettings>();
 
-	int KeyboardProfileIndex = Settings->FindKeyboardProfileIndexFromKey(Key, ELocalMultiplayerInputMappingType::InGame);
+	int PlayerIndex = INDEX_NONE;
 
-	if(KeyboardProfileIndex == INDEX_NONE)
+	if(bGamepad)
 	{
-		return Super::InputAxis(InViewport, InputDevice, Key, Delta, DeltaTime, NumSamples, bGamepad);
-	}
+		PlayerIndex = Subsystem->GetAssignedPlayerIndexFromGamepadDeviceID(InputDevice.GetId());
 
-	bGamepad ? Subsystem->AssignNewPlayerToGamepadDeviceID(InputDevice.GetId())
-			 : Subsystem->AssignNewPlayerToKeyboardProfile(KeyboardProfileIndex);
-
-	int PlayerIndex = bGamepad ? Subsystem->GetAssignedPlayerIndexFromGamepadDeviceID(InputDevice.GetId())
-							   : Subsystem->GetAssignedPlayerIndexFromKeyboardProfileIndex(KeyboardProfileIndex);
-
-	if(PlayerIndex == INDEX_NONE)
-	{
-		if(bGamepad)
+		if(PlayerIndex == INDEX_NONE)
 		{
 			PlayerIndex = Subsystem->AssignNewPlayerToGamepadDeviceID(InputDevice.GetId());
 			Subsystem->AssignGamepadInputMapping(PlayerIndex, ELocalMultiplayerInputMappingType::InGame);
 		}
-		else
+	}
+	else
+	{
+		int KeyboardProfileIndex = Settings->FindKeyboardProfileIndexFromKey(Key, ELocalMultiplayerInputMappingType::InGame);
+		if(KeyboardProfileIndex == INDEX_NONE)
+		{
+			return Super::InputAxis(InViewport, InputDevice, Key, Delta, DeltaTime, NumSamples, bGamepad);
+		}
+
+		PlayerIndex = Subsystem->GetAssignedPlayerIndexFromKeyboardProfileIndex(KeyboardProfileIndex);
+
+		if(PlayerIndex == INDEX_NONE)
 		{
 			PlayerIndex = Subsystem->AssignNewPlayerToKeyboardProfile(KeyboardProfileIndex);
 			Subsystem->AssignKeyboardMapping(PlayerIndex, KeyboardProfileIndex, ELocalMultiplayerInputMappingType::InGame);
@@ -93,6 +100,6 @@ bool ULocalMultiplayerGameViewportClient::InputAxis(FViewport* InViewport, FInpu
 
 	APlayerController* Controller = UGameplayStatics::GetPlayerController(this, PlayerIndex);
 
-	FInputKeyParams InputKeyParams(Key, 0, DeltaTime, NumSamples, bGamepad, InputDevice);
+	FInputKeyParams InputKeyParams(Key, Delta, DeltaTime, NumSamples, bGamepad, InputDevice);
 	return Controller->InputKey(InputKeyParams);
 }

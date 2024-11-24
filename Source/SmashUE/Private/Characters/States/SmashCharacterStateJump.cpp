@@ -6,6 +6,7 @@
 #include "Characters/SmashCharacterStateMachine.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Characters/SmashCharacterSettings.h"
+#include "Characters/States/SmashCharacterStateFall.h"
 
 ESmashCharacterStateID USmashCharacterStateJump::GetStateID()
 {
@@ -21,14 +22,35 @@ void USmashCharacterStateJump::StateInit(USmashCharacterStateMachine* InStateMac
 		bUseAnimDuration = false;
 	}
 
+	if(OtherJumpsAnimation == nullptr)
+	{
+		OtherJumpsAnimation = StateAnimation;
+	}
+
 	float TargetJumpDuration = bUseAnimDuration ? StateAnimation->GetPlayLength() : JumpDuration;
 
 	JumpVelocity = (2.0 * JumpMaxHeight) / TargetJumpDuration;
 	JumpGravity = (-2.0 * JumpMaxHeight) / FMath::Pow(TargetJumpDuration, 2);
+
+	USmashCharacterStateFall* FallState = Cast<USmashCharacterStateFall>(StateMachine->GetState(ESmashCharacterStateID::Fall));
+	if(FallState == nullptr)
+	{
+#if WITH_EDITOR
+		const FString Message = FString::Printf(TEXT("Fall state not implemented in %s"), *Character.GetClass()->GetName());
+
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, Message);
+		FMessageLog("BlueprintLog").Warning(FText::FromString(Message));
+#endif
+		return;
+	}
+
+	FallState->SetMaxJumpCount(MaxJumpCount);
 }
 
 void USmashCharacterStateJump::StateEnter(ESmashCharacterStateID PreviousStateID)
 {
+	JumpCount++;
+
 	Super::StateEnter(PreviousStateID);
 
 	Character->GetCharacterMovement()->MaxWalkSpeed = JumpWalkSpeed;
@@ -37,11 +59,31 @@ void USmashCharacterStateJump::StateEnter(ESmashCharacterStateID PreviousStateID
 
 	Character->GetCharacterMovement()->Velocity.Z = JumpVelocity;
 	Character->GetCharacterMovement()->SetMovementMode(MOVE_Falling);
+
+	if(Character->GetInputMoveX() != 0.0f)
+	{
+		Character->SetOrientX(Character->GetInputMoveX());
+	}
+
+	Character->GetCharacterMovement()->Velocity.X = Character->GetOrientX() * FMath::Abs(Character->GetCharacterMovement()->Velocity.X);
 }
 
 void USmashCharacterStateJump::StateExit(ESmashCharacterStateID NextStateID)
 {
 	Super::StateExit(NextStateID);
+
+	if(NextStateID != ESmashCharacterStateID::Fall)
+	{
+		return;
+	}
+
+	USmashCharacterStateFall* FallState = Cast<USmashCharacterStateFall>(StateMachine->GetState(NextStateID));
+	if(FallState == nullptr)
+	{
+		return;
+	}
+
+	FallState->SetJumpCount(JumpCount);
 }
 
 void USmashCharacterStateJump::StateTick(float DeltaTime)
@@ -62,6 +104,19 @@ void USmashCharacterStateJump::StateTick(float DeltaTime)
 		Character->GetCharacterMovement()->Velocity.Z = 0.0f;
 		StateMachine->ChangeState(ESmashCharacterStateID::Fall);
 	}
+}
+
+void USmashCharacterStateJump::PlayStateAnimation()
+{
+	UAnimMontage* AnimToPlay = JumpCount == 1 ? StateAnimation : OtherJumpsAnimation;
+
+	if(AnimToPlay == nullptr)
+	{
+		Character->StopAnimMontage(nullptr);
+		return;
+	}
+
+	Character->PlayAnimMontage(AnimToPlay);
 }
 
 #if WITH_EDITOR

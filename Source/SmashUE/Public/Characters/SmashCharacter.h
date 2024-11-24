@@ -106,6 +106,7 @@ protected:
 	UPROPERTY()
 	float InputMoveY = 0.0f;
 
+	UPROPERTY()
 	bool bInputJump = false;
 
 private:

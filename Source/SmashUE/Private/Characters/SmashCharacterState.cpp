@@ -20,6 +20,15 @@ void USmashCharacterState::StateInit(USmashCharacterStateMachine* InStateMachine
 
 void USmashCharacterState::StateEnter(ESmashCharacterStateID PreviousStateID)
 {
+	PlayStateAnimation();
+}
+
+void USmashCharacterState::StateExit(ESmashCharacterStateID NextStateID) {}
+
+void USmashCharacterState::StateTick(float DeltaTime) {}
+
+void USmashCharacterState::PlayStateAnimation()
+{
 	if(StateAnimation == nullptr)
 	{
 		Character->StopAnimMontage(nullptr);
@@ -28,7 +37,3 @@ void USmashCharacterState::StateEnter(ESmashCharacterStateID PreviousStateID)
 
 	Character->PlayAnimMontage(StateAnimation);
 }
-
-void USmashCharacterState::StateExit(ESmashCharacterStateID NextStateID) {}
-
-void USmashCharacterState::StateTick(float DeltaTime) {}
