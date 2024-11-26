@@ -104,7 +104,7 @@ void USmashCharacterStateFall::StateTick(float DeltaTime)
 		return;
 	}
 
-	if(MoveYValue < -CharacterSettings->InputMoveXThreshold)
+	if(MoveYValue < -CharacterSettings->InputMoveYThreshold)
 	{
 		Character->GetCharacterMovement()->GravityScale = FallFastGravityScale;
 	}

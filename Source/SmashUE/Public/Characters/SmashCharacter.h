@@ -8,6 +8,8 @@
 #include "GameFramework/Character.h"
 #include "SmashCharacter.generated.h"
 
+enum class ETriggerEvent : uint8;
+class UInputAction;
 enum class ESmashCharacterStateID : uint8;
 class USmashCharacterState;
 class USmashCharacterInputData;
@@ -96,6 +98,10 @@ public:
 
 	bool GetInputJump() const;
 
+	bool GetInputBasicAttack() const;
+
+	bool GetInputSpecialAttack() const;
+
 	UPROPERTY()
 	FInputMoveXEvent InputMoveXFastEvent;
 
@@ -109,16 +115,35 @@ protected:
 	UPROPERTY()
 	bool bInputJump = false;
 
+	UPROPERTY()
+	bool bInputBasicAttack = false;
+
+	UPROPERTY()
+	bool bInputSpecialAttack = false;
+
 private:
 	void BindInputMoveXAxisAndActions(UEnhancedInputComponent* EnhancedInputComponent);
 
+	// the bound func needs to be a UFUNCTION
+	void BindAction(UEnhancedInputComponent* EnhancedInputComponent, const UInputAction* Action, const TArray<ETriggerEvent>& TriggerEvents, const FName& FuncName);
+
+	UFUNCTION()
 	void OnInputMoveX(const FInputActionValue& InputActionValue);
 
+	UFUNCTION()
 	void OnInputMoveY(const FInputActionValue& InputActionValue);
 
+	UFUNCTION()
 	void OnInputMoveXFast(const FInputActionValue& InputActionValue);
 
+	UFUNCTION()
 	void OnInputJump(const FInputActionValue& InputActionValue);
+
+	UFUNCTION()
+	void OnInputBasicAttack(const FInputActionValue& InputActionValue);
+
+	UFUNCTION()
+	void OnInputSpecialAttack(const FInputActionValue& InputActionValue);
 
 #pragma endregion
 

@@ -24,6 +24,9 @@ public:
 	UPROPERTY(Config, EditDefaultsOnly, Category = "Inputs", meta = (ClampMin = 0.0f, ClampMax = 1.0f, UIMin = 0.0f, UIMax = 1.0f))
 	float InputMoveXThreshold = 0.1f;
 
+	UPROPERTY(Config, EditDefaultsOnly, Category = "Inputs", meta = (ClampMin = 0.0f, ClampMax = 1.0f, UIMin = 0.0f, UIMax = 1.0f))
+	float InputMoveYThreshold = 0.1f;
+
 	UPROPERTY(Config, EditDefaultsOnly, Category = "Orient", DisplayName = "2D Orient")
 	bool b2DOrient = true;
 

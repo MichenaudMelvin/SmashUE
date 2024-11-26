@@ -53,6 +53,8 @@ bool ULocalMultiplayerGameViewportClient::InputKey(const FInputKeyEventArgs& Eve
 		return Super::InputKey(EventArgs);
 	}
 
+	Super::InputKey(EventArgs); // still calling it for editor features (such as console commands)
+
 	APlayerController* Controller = UGameplayStatics::GetPlayerController(this, PlayerIndex);
 
 	FInputKeyParams InputKeyParams(EventArgs.Key, EventArgs.Event, EventArgs.AmountDepressed, EventArgs.IsGamepad(), EventArgs.InputDevice);
@@ -97,6 +99,8 @@ bool ULocalMultiplayerGameViewportClient::InputAxis(FViewport* InViewport, FInpu
 	{
 		return Super::InputAxis(InViewport, InputDevice, Key, Delta, DeltaTime, NumSamples, bGamepad);
 	}
+
+	Super::InputAxis(InViewport, InputDevice, Key, Delta, DeltaTime, NumSamples, bGamepad); // still calling it for editor features (such as console commands)
 
 	APlayerController* Controller = UGameplayStatics::GetPlayerController(this, PlayerIndex);
 

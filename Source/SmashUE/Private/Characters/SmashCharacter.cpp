@@ -14,6 +14,7 @@ ASmashCharacter::ASmashCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+	GetMesh()->SetCollisionResponseToAllChannels(ECR_Ignore);
 }
 
 void ASmashCharacter::BeginPlay()
@@ -162,6 +163,16 @@ bool ASmashCharacter::GetInputJump() const
 	return bInputJump;
 }
 
+bool ASmashCharacter::GetInputBasicAttack() const
+{
+	return bInputBasicAttack;
+}
+
+bool ASmashCharacter::GetInputSpecialAttack() const
+{
+	return bInputSpecialAttack;
+}
+
 void ASmashCharacter::BindInputMoveXAxisAndActions(UEnhancedInputComponent* EnhancedInputComponent)
 {
 	if(InputData == nullptr)
@@ -169,86 +180,55 @@ void ASmashCharacter::BindInputMoveXAxisAndActions(UEnhancedInputComponent* Enha
 		return;
 	}
 
-	if(InputData->InputActionMoveX)
+	TArray<ETriggerEvent> DefaultTriggerEvents;
+	DefaultTriggerEvents.Add(ETriggerEvent::Started);
+	DefaultTriggerEvents.Add(ETriggerEvent::Triggered);
+	DefaultTriggerEvents.Add(ETriggerEvent::Completed);
+
+	if(InputData->InputActionMoveX != nullptr)
 	{
-		EnhancedInputComponent->BindAction(
-			InputData->InputActionMoveX,
-			ETriggerEvent::Started,
-			this,
-			&ASmashCharacter::OnInputMoveX
-		);
-
-		EnhancedInputComponent->BindAction(
-			InputData->InputActionMoveX,
-			ETriggerEvent::Completed,
-			this,
-			&ASmashCharacter::OnInputMoveX
-		);
-
-		EnhancedInputComponent->BindAction(
-			InputData->InputActionMoveX,
-			ETriggerEvent::Triggered,
-			this,
-			&ASmashCharacter::OnInputMoveX
-		);
+		FName FuncName = GET_FUNCTION_NAME_CHECKED_OneParam(ASmashCharacter, OnInputMoveX, const FInputActionValue&);
+		BindAction(EnhancedInputComponent, InputData->InputActionMoveX, DefaultTriggerEvents, FuncName);
 	}
 
-	if(InputData->InputActionMoveXFast)
+	if(InputData->InputActionMoveXFast != nullptr)
 	{
-		EnhancedInputComponent->BindAction(
-			InputData->InputActionMoveXFast,
-			ETriggerEvent::Triggered,
-			this,
-			&ASmashCharacter::OnInputMoveXFast
-		);
+		TArray<ETriggerEvent> TriggerEvents;
+		TriggerEvents.Add(ETriggerEvent::Triggered);
+		FName FuncName = GET_FUNCTION_NAME_CHECKED_OneParam(ASmashCharacter, OnInputMoveXFast, const FInputActionValue&);
+		BindAction(EnhancedInputComponent, InputData->InputActionMoveXFast, TriggerEvents, FuncName);
 	}
 
-	if(InputData->InputActionMoveY)
+	if(InputData->InputActionMoveY != nullptr)
 	{
-		EnhancedInputComponent->BindAction(
-			InputData->InputActionMoveY,
-			ETriggerEvent::Started,
-			this,
-			&ASmashCharacter::OnInputMoveY
-		);
-
-		EnhancedInputComponent->BindAction(
-			InputData->InputActionMoveY,
-			ETriggerEvent::Completed,
-			this,
-			&ASmashCharacter::OnInputMoveY
-		);
-
-		EnhancedInputComponent->BindAction(
-			InputData->InputActionMoveY,
-			ETriggerEvent::Triggered,
-			this,
-			&ASmashCharacter::OnInputMoveY
-		);
+		FName FuncName = GET_FUNCTION_NAME_CHECKED_OneParam(ASmashCharacter, OnInputMoveY, const FInputActionValue&);
+		BindAction(EnhancedInputComponent, InputData->InputActionMoveY, DefaultTriggerEvents, FuncName);
 	}
 
-	if(InputData->InputActionJump)
+	if(InputData->InputActionJump != nullptr)
 	{
-		EnhancedInputComponent->BindAction(
-			InputData->InputActionJump,
-			ETriggerEvent::Started,
-			this,
-			&ASmashCharacter::OnInputJump
-		);
+		FName FuncName = GET_FUNCTION_NAME_CHECKED_OneParam(ASmashCharacter, OnInputJump, const FInputActionValue&);
+		BindAction(EnhancedInputComponent, InputData->InputActionJump, DefaultTriggerEvents, FuncName);
+	}
 
-		EnhancedInputComponent->BindAction(
-			InputData->InputActionJump,
-			ETriggerEvent::Triggered,
-			this,
-			&ASmashCharacter::OnInputJump
-		);
+	if(InputData->InputActionBasicAttack != nullptr)
+	{
+		FName FuncName = GET_FUNCTION_NAME_CHECKED_OneParam(ASmashCharacter, OnInputBasicAttack, const FInputActionValue&);
+		BindAction(EnhancedInputComponent, InputData->InputActionBasicAttack, DefaultTriggerEvents, FuncName);
+	}
 
-		EnhancedInputComponent->BindAction(
-			InputData->InputActionJump,
-			ETriggerEvent::Completed,
-			this,
-			&ASmashCharacter::OnInputJump
-		);
+	if(InputData->InputActionSpecialAttack != nullptr)
+	{
+		FName FuncName = GET_FUNCTION_NAME_CHECKED_OneParam(ASmashCharacter, OnInputSpecialAttack, const FInputActionValue&);
+		BindAction(EnhancedInputComponent, InputData->InputActionSpecialAttack, DefaultTriggerEvents, FuncName);
+	}
+}
+
+void ASmashCharacter::BindAction(UEnhancedInputComponent* EnhancedInputComponent, const UInputAction* Action, const TArray<ETriggerEvent>& TriggerEvents, const FName& FuncName)
+{
+	for (const ETriggerEvent& Event : TriggerEvents)
+	{
+		EnhancedInputComponent->BindAction(Action, Event, this, FuncName);
 	}
 }
 
@@ -271,6 +251,16 @@ void ASmashCharacter::OnInputMoveXFast(const FInputActionValue& InputActionValue
 void ASmashCharacter::OnInputJump(const FInputActionValue& InputActionValue)
 {
 	bInputJump = InputActionValue.Get<bool>();
+}
+
+void ASmashCharacter::OnInputBasicAttack(const FInputActionValue& InputActionValue)
+{
+	bInputBasicAttack = InputActionValue.Get<bool>();
+}
+
+void ASmashCharacter::OnInputSpecialAttack(const FInputActionValue& InputActionValue)
+{
+	bInputSpecialAttack = InputActionValue.Get<bool>();
 }
 
 FVector ASmashCharacter::GetFollowPosition()
