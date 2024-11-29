@@ -8,9 +8,9 @@
 #include "Characters/SmashCharacterSettings.h"
 #include "Kismet/GameplayStatics.h"
 #include "Characters/SmashCharacterInputData.h"
-#include "InputMappingContext.h"
 #include "LocalMultiplayerSettings.h"
 #include "LocalMultiplayerSubsystem.h"
+#include "SmashGameInstance.h"
 
 void AMatchGameMode::BeginPlay()
 {
@@ -71,15 +71,15 @@ void AMatchGameMode::CreateAndInitPlayers() const
 void AMatchGameMode::SpawnCharacters(const TArray<AArenaPlayerStart*>& SpawnPoints)
 {
 	USmashCharacterInputData* InputData = LoadInputDataFromConfig();
+	const USmashCharacterSettings* CharacterSettings = GetDefault<USmashCharacterSettings>();
+	const TArray<FName>& PlayersIDs = Cast<USmashGameInstance>(GetGameInstance())->GetPlayersIDs();
 
-	//GetDefault<UArenaSettings>()->NumbersOfPlayers is temp
-	for(int i = 0; i < GetDefault<UArenaSettings>()->NumbersOfPlayers; i++)
-	// for (AArenaPlayerStart* SpawnPoint : SpawnPoints)
+	for (int i = 0; i < PlayersIDs.Num(); ++i)
 	{
+		const FName& PlayerID = PlayersIDs[i];
 		AArenaPlayerStart* SpawnPoint = SpawnPoints[i];
 
-		EAutoReceiveInput::Type InputType = SpawnPoint->AutoReceiveInput.GetValue();
-		TSubclassOf<ASmashCharacter> SmashCharacterClass = GetSmashCharacterClassFromInputType(InputType);
+		TSubclassOf<ASmashCharacter> SmashCharacterClass = CharacterSettings->GetCharacterClassFromCharacterID(PlayerID);
 
 		if(SmashCharacterClass == nullptr)
 		{

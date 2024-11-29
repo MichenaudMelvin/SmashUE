@@ -6,6 +6,7 @@
 #include "Characters/SmashCharacterInputData.h"
 #include "EnhancedInputComponent.h"
 #include "SmashCharacterState.h"
+#include "UsefulFunctions.h"
 #include "Camera/CameraWorldSubsystem.h"
 #include "Characters/SmashCharacterSettings.h"
 #include "Components/CapsuleComponent.h"
@@ -47,7 +48,7 @@ void ASmashCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 		return;
 	}
 
-	BindInputMoveXAxisAndActions(EnhancedInputComponent);
+	BindInputActions(EnhancedInputComponent);
 }
 
 float ASmashCharacter::GetOrientX() const
@@ -173,7 +174,7 @@ bool ASmashCharacter::GetInputSpecialAttack() const
 	return bInputSpecialAttack;
 }
 
-void ASmashCharacter::BindInputMoveXAxisAndActions(UEnhancedInputComponent* EnhancedInputComponent)
+void ASmashCharacter::BindInputActions(UEnhancedInputComponent* EnhancedInputComponent)
 {
 	if(InputData == nullptr)
 	{
@@ -188,7 +189,7 @@ void ASmashCharacter::BindInputMoveXAxisAndActions(UEnhancedInputComponent* Enha
 	if(InputData->InputActionMoveX != nullptr)
 	{
 		FName FuncName = GET_FUNCTION_NAME_CHECKED_OneParam(ASmashCharacter, OnInputMoveX, const FInputActionValue&);
-		BindAction(EnhancedInputComponent, InputData->InputActionMoveX, DefaultTriggerEvents, FuncName);
+		UUsefulFunctions::BindAction(EnhancedInputComponent, InputData->InputActionMoveX, DefaultTriggerEvents, this, FuncName);
 	}
 
 	if(InputData->InputActionMoveXFast != nullptr)
@@ -196,39 +197,31 @@ void ASmashCharacter::BindInputMoveXAxisAndActions(UEnhancedInputComponent* Enha
 		TArray<ETriggerEvent> TriggerEvents;
 		TriggerEvents.Add(ETriggerEvent::Triggered);
 		FName FuncName = GET_FUNCTION_NAME_CHECKED_OneParam(ASmashCharacter, OnInputMoveXFast, const FInputActionValue&);
-		BindAction(EnhancedInputComponent, InputData->InputActionMoveXFast, TriggerEvents, FuncName);
+		UUsefulFunctions::BindAction(EnhancedInputComponent, InputData->InputActionMoveXFast, TriggerEvents, this, FuncName);
 	}
 
 	if(InputData->InputActionMoveY != nullptr)
 	{
 		FName FuncName = GET_FUNCTION_NAME_CHECKED_OneParam(ASmashCharacter, OnInputMoveY, const FInputActionValue&);
-		BindAction(EnhancedInputComponent, InputData->InputActionMoveY, DefaultTriggerEvents, FuncName);
+		UUsefulFunctions::BindAction(EnhancedInputComponent, InputData->InputActionMoveY, DefaultTriggerEvents, this, FuncName);
 	}
 
 	if(InputData->InputActionJump != nullptr)
 	{
 		FName FuncName = GET_FUNCTION_NAME_CHECKED_OneParam(ASmashCharacter, OnInputJump, const FInputActionValue&);
-		BindAction(EnhancedInputComponent, InputData->InputActionJump, DefaultTriggerEvents, FuncName);
+		UUsefulFunctions::BindAction(EnhancedInputComponent, InputData->InputActionJump, DefaultTriggerEvents, this, FuncName);
 	}
 
 	if(InputData->InputActionBasicAttack != nullptr)
 	{
 		FName FuncName = GET_FUNCTION_NAME_CHECKED_OneParam(ASmashCharacter, OnInputBasicAttack, const FInputActionValue&);
-		BindAction(EnhancedInputComponent, InputData->InputActionBasicAttack, DefaultTriggerEvents, FuncName);
+		UUsefulFunctions::BindAction(EnhancedInputComponent, InputData->InputActionBasicAttack, DefaultTriggerEvents, this, FuncName);
 	}
 
 	if(InputData->InputActionSpecialAttack != nullptr)
 	{
 		FName FuncName = GET_FUNCTION_NAME_CHECKED_OneParam(ASmashCharacter, OnInputSpecialAttack, const FInputActionValue&);
-		BindAction(EnhancedInputComponent, InputData->InputActionSpecialAttack, DefaultTriggerEvents, FuncName);
-	}
-}
-
-void ASmashCharacter::BindAction(UEnhancedInputComponent* EnhancedInputComponent, const UInputAction* Action, const TArray<ETriggerEvent>& TriggerEvents, const FName& FuncName)
-{
-	for (const ETriggerEvent& Event : TriggerEvents)
-	{
-		EnhancedInputComponent->BindAction(Action, Event, this, FuncName);
+		UUsefulFunctions::BindAction(EnhancedInputComponent, InputData->InputActionSpecialAttack, DefaultTriggerEvents, this, FuncName);
 	}
 }
 

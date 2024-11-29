@@ -82,9 +82,6 @@ protected:
 
 public:
 	UPROPERTY()
-	TObjectPtr<UInputMappingContext> InputMappingContext;
-
-	UPROPERTY()
 	TObjectPtr<USmashCharacterInputData> InputData;
 
 #pragma endregion
@@ -122,10 +119,7 @@ protected:
 	bool bInputSpecialAttack = false;
 
 private:
-	void BindInputMoveXAxisAndActions(UEnhancedInputComponent* EnhancedInputComponent);
-
-	// the bound func needs to be a UFUNCTION
-	void BindAction(UEnhancedInputComponent* EnhancedInputComponent, const UInputAction* Action, const TArray<ETriggerEvent>& TriggerEvents, const FName& FuncName);
+	void BindInputActions(UEnhancedInputComponent* EnhancedInputComponent);
 
 	UFUNCTION()
 	void OnInputMoveX(const FInputActionValue& InputActionValue);

@@ -26,8 +26,6 @@ protected:
 private:
 	USmashCharacterInputData* LoadInputDataFromConfig();
 
-	UInputMappingContext* LoadInputMappingContextFromConfig();
-
 	void FindPlayerStartActorsInArena(TArray<AArenaPlayerStart*>& ResultActors);
 
 	void CreateAndInitPlayers() const;
