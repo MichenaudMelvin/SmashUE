@@ -22,4 +22,7 @@ protected:
 	int GetNumberOfPlayer() const;
 
 	void SpawnPawns(int PawnNumber);
+
+public:
+	void LaunchGame();
 };

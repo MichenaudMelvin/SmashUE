@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "UIPlayerToken.generated.h"
 
+class UUIPlayerCursor;
 class UUICharacterSelection;
 
 UCLASS()
@@ -14,17 +15,20 @@ class SMASHUE_API UUIPlayerToken : public UUserWidget
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY(VisibleDefaultsOnly, Category = "Display", meta = (BindWidget))
-	TObjectPtr<UWidget> DetectionArea;
+	UPROPERTY(BlueprintReadWrite, Category = "Cursor")
+	TObjectPtr<UUIPlayerCursor> PlayerCursor;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Token")
 	TObjectPtr<UUICharacterSelection> CharacterSelection;
 
+	UPROPERTY(BlueprintReadWrite, Category = "Token")
+	int PlayerNumber = -1;
+
 public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Display")
-	void InitToken(int PlayerNumber, UUICharacterSelection* InCharacterSelection);
+	void InitToken(int InPlayerNumber, UUIPlayerCursor* InCursor, UUICharacterSelection* InCharacterSelection);
 
-	const UWidget* GetDetectionArea() const {return DetectionArea;}
+	void GrabToken();
 
-	bool CanDropToken() const;
+	void TryToDropToken();
 };

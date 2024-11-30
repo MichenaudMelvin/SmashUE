@@ -6,6 +6,8 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "LocalMultiplayerSubsystem.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAssignNewPlayer, int, PlayerIndex);
+
 enum class ELocalMultiplayerInputMappingType : uint8;
 
 UCLASS()
@@ -28,6 +30,15 @@ public:
 	int AssignNewPlayerToGamepadDeviceID(int DeviceID);
 
 	void AssignGamepadInputMapping(int PlayerIndex, ELocalMultiplayerInputMappingType MappingType) const;
+
+	int GetCurrentPlayerNumber() const;
+
+	UPROPERTY(BlueprintAssignable, Category = "LocalMultiplayer")
+	FOnAssignNewPlayer OnAssignNewPlayer;
+
+	static constexpr int MaxPlayerNumber = 4;
+
+	static ELocalMultiplayerInputMappingType CurrentMappingType;
 
 protected:
 	UPROPERTY()

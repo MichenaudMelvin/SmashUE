@@ -41,7 +41,7 @@ public:
 	FVector2D GetInputMove() const {return InputMove;}
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Inputs")
-	bool GetInputStart() const {return bInputStart;}
+	bool IsReady() const {return bInputStart;}
 
 private:
 	UFUNCTION()

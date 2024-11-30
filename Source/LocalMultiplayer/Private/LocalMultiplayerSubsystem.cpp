@@ -6,16 +6,25 @@
 #include "LocalMultiplayerSettings.h"
 #include "Kismet/GameplayStatics.h"
 
+ELocalMultiplayerInputMappingType ULocalMultiplayerSubsystem::CurrentMappingType = ELocalMultiplayerInputMappingType::InGame;
+
 void ULocalMultiplayerSubsystem::CreateAndInitPlayers(ELocalMultiplayerInputMappingType MappingType)
 {
-	const ULocalMultiplayerSettings* Settings = GetDefault<ULocalMultiplayerSettings>();
-	int NBControllers = Settings->GetNBKeyboardProfiles() + Settings->NBMaxGamepads;
+	CurrentMappingType = MappingType;
 
 	int CurrentPlayerNumber = UGameplayStatics::GetNumLocalPlayerControllers(this);
+	if (CurrentPlayerNumber/2 >= MaxPlayerNumber)
+	{
+		return;
+	}
+
+	const ULocalMultiplayerSettings* Settings = GetDefault<ULocalMultiplayerSettings>();
 	for (int i = CurrentPlayerNumber; i < Settings->GetNBKeyboardProfiles(); i++)
 	{
 		UGameplayStatics::CreatePlayer(this, i, true);
 	}
+
+	int NBControllers = Settings->GetNBKeyboardProfiles() + Settings->NBMaxGamepads;
 
 	for (int i = Settings->GetNBKeyboardProfiles(); i < NBControllers; i++)
 	{
@@ -37,8 +46,16 @@ int ULocalMultiplayerSubsystem::AssignNewPlayerToKeyboardProfile(int KeyboardPro
 	}
 
 	int PlayerIndex = LastAssignedPlayerIndex;
+	if (PlayerIndex >= MaxPlayerNumber)
+	{
+		return INDEX_NONE;
+	}
+
 	PlayerIndexFromKeyboardProfileIndex.Add(KeyboardProfileIndex, PlayerIndex);
+	OnAssignNewPlayer.Broadcast(PlayerIndex);
 	LastAssignedPlayerIndex++;
+	LastAssignedPlayerIndex = FMath::Clamp(0, LastAssignedPlayerIndex, MaxPlayerNumber);
+
 	return PlayerIndex;
 }
 
@@ -64,6 +81,10 @@ void ULocalMultiplayerSubsystem::AssignKeyboardMapping(int PlayerIndex, int Keyb
 
 	const ULocalMultiplayerSettings* Settings = GetDefault<ULocalMultiplayerSettings>();
 	UInputMappingContext* MappingContext = Settings->KeyboardProfilesData[KeyboardProfileIndex].GetIMCFromType(MappingType);
+	if (Subsystem->HasMappingContext(MappingContext))
+	{
+		return;
+	}
 
 	FModifyContextOptions ContextOptions = FModifyContextOptions();
 	ContextOptions.bForceImmediately = true;
@@ -84,8 +105,16 @@ int ULocalMultiplayerSubsystem::AssignNewPlayerToGamepadDeviceID(int DeviceID)
 	}
 
 	int PlayerIndex = LastAssignedPlayerIndex;
+	if (PlayerIndex >= MaxPlayerNumber)
+	{
+		return INDEX_NONE;
+	}
+
 	PlayerIndexFromGamepadProfileIndex.Add(DeviceID, PlayerIndex);
+	OnAssignNewPlayer.Broadcast(PlayerIndex);
 	LastAssignedPlayerIndex++;
+	LastAssignedPlayerIndex = FMath::Clamp(0, LastAssignedPlayerIndex, MaxPlayerNumber);
+
 	return PlayerIndex;
 }
 
@@ -111,8 +140,17 @@ void ULocalMultiplayerSubsystem::AssignGamepadInputMapping(int PlayerIndex, ELoc
 
 	const ULocalMultiplayerSettings* Settings = GetDefault<ULocalMultiplayerSettings>();
 	UInputMappingContext* MappingContext = Settings->GamepadProfileData.GetIMCFromType(MappingType);
+	if (Subsystem->HasMappingContext(MappingContext))
+	{
+		return;
+	}
 
 	FModifyContextOptions ContextOptions = FModifyContextOptions();
 	ContextOptions.bForceImmediately = true;
 	Subsystem->AddMappingContext(MappingContext, 0, ContextOptions);
+}
+
+int ULocalMultiplayerSubsystem::GetCurrentPlayerNumber() const
+{
+	return PlayerIndexFromKeyboardProfileIndex.Num() + PlayerIndexFromGamepadProfileIndex.Num();
 }

@@ -7,6 +7,9 @@
 #include "Blueprint/UserWidget.h"
 #include "UICharacterSelection.generated.h"
 
+class UUIStockButton;
+class UUIPreviewPanel;
+class UUICharacterGridCell;
 class UUIPlayerToken;
 class UUIPlayerCursor;
 class UCanvasPanelSlot;
@@ -20,12 +23,12 @@ class SMASHUE_API UUICharacterSelection : public UUserWidget
 #pragma region Defaults
 
 protected:
-	UPROPERTY()
-	TArray<ACharacterSelectionPawn*> Pawns;
-
 	virtual void NativeOnInitialized() override;
 
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+
+	UFUNCTION()
+	void AddPlayer(int ElementsIndex);
 
 #pragma endregion
 
@@ -45,6 +48,11 @@ protected:
 
 	UPROPERTY()
 	TArray<UUIPlayerCursor*> Cursors;
+
+	UPROPERTY()
+	TArray<UUIStockButton*> StockButtons;
+
+	void CursorTick(const FGeometry& MyGeometry, float InDeltaTime);
 
 #pragma endregion
 
@@ -70,14 +78,46 @@ protected:
 
 #pragma region Characters
 
+protected:
+	UPROPERTY()
+	TArray<ACharacterSelectionPawn*> Pawns;
+
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Characters", meta = (BindWidget))
 	TObjectPtr<UPanelWidget> CharactersIconPanel;
 
 	UPROPERTY()
-	TArray<UWidget*> CharactersIcons;
+	TArray<UUICharacterGridCell*> CharactersIcons;
+
+	void CheckCharactersReadyState();
 
 public:
-	bool DoesTokenOverlapACharacterIcon(const UUIPlayerToken* Token) const;
+	UUICharacterGridCell* GetOverlappedCharacterIcon(const UUIPlayerToken* Token) const;
+#pragma endregion
 
-#pragma endregion 
+#pragma region PreviewPanels
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "PreviewPanel", meta = (BindWidget))
+	TObjectPtr<UPanelWidget> PreviewPanelContainer;
+
+	UPROPERTY()
+	TArray<UUIPreviewPanel*> PreviewPanels;
+
+	UFUNCTION()
+	void EnablePanel(int PlayerIndex, const FName& CharacterID);
+
+	UFUNCTION()
+	void DisablePanel(int PlayerIndex);
+
+#pragma endregion
+
+#pragma region ReadyPanel
+
+protected:
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Cursors", meta = (BindWidget))
+	TObjectPtr<UPanelWidget> ReadyPanel;
+
+	UFUNCTION()
+	void SetReadyPanelVisibility();
+
+#pragma endregion
 };

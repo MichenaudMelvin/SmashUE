@@ -53,8 +53,10 @@ void ACharacterSelectionPawn::SetupPlayerInputComponent(UInputComponent* PlayerI
 
 	if(InputData->InputStart)
 	{
+		TArray<ETriggerEvent> StartTriggerEvents;
+		StartTriggerEvents.Add(ETriggerEvent::Started);
 		FName FuncName = GET_FUNCTION_NAME_CHECKED_OneParam(ACharacterSelectionPawn, OnInputStart, const FInputActionValue&);
-		UUsefulFunctions::BindAction(EnhancedInputComponent, InputData->InputStart, DefaultTriggerEvents, this, FuncName);
+		UUsefulFunctions::BindAction(EnhancedInputComponent, InputData->InputStart, StartTriggerEvents, this, FuncName);
 	}
 }
 
@@ -75,6 +77,6 @@ void ACharacterSelectionPawn::OnInputMove(const FInputActionValue& InputActionVa
 
 void ACharacterSelectionPawn::OnInputStart(const FInputActionValue& InputActionValue)
 {
-	bInputStart = InputActionValue.Get<bool>();
+	bInputStart = !bInputStart;
 }
 

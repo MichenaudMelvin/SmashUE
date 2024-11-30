@@ -7,7 +7,9 @@
 #include "CharactersSelection/CharacterSelectionSettings.h"
 #include "CharactersSelection/CharacterSelectionPawn.h"
 #include "Components/CanvasPanelSlot.h"
+#include "Components/PanelWidget.h"
 #include "UI/UIPlayerToken.h"
+#include "UI/UIStockButton.h"
 
 void UUIPlayerCursor::NativeOnInitialized()
 {
@@ -39,10 +41,12 @@ void UUIPlayerCursor::TickCursor(const FGeometry& ParentGeometry, float DeltaTim
 void UUIPlayerCursor::SetCursorState_Implementation(ECursorState NewState)
 {
 	CursorState = NewState;
+	bReleasedInteraction = false;
 }
 
 void UUIPlayerCursor::AttachToken()
 {
+	CurrentToken->GrabToken();
 	SetCursorState(Pinched);
 }
 
@@ -56,16 +60,23 @@ void UUIPlayerCursor::Move(const FGeometry& ParentGeometry, float DeltaTime)
 	const UCharacterSelectionSettings* Settings = GetDefault<UCharacterSelectionSettings>();
 	UCanvasPanelSlot* CurrentSlot = Cast<UCanvasPanelSlot>(Slot);
 
-	if (CurrentPawn == nullptr || CurrentSlot == nullptr)
+	if (CurrentPawn == nullptr || CurrentSlot == nullptr || GetParent() == nullptr)
 	{
 		return;
 	}
 
 	FVector2D TargetPosition = CurrentSlot->GetPosition() + (CurrentPawn->GetInputMove() * Settings->CursorSpeed * DeltaTime);
 
-	// TODO add size of cursor
-	TargetPosition.X = FMath::Clamp(TargetPosition.X, 0, ParentGeometry.Size.X);
-	TargetPosition.Y = FMath::Clamp(TargetPosition.Y, 0, ParentGeometry.Size.Y);
+	FVector2D CursorSize = GetPaintSpaceGeometry().GetAbsoluteSize();
+	FVector2D ParentSize = GetParent()->GetPaintSpaceGeometry().GetLocalSize();
+
+	if (ParentSize == FVector2D::ZeroVector || CursorSize == FVector2D::ZeroVector)
+	{
+		return;
+	}
+
+	TargetPosition.X = FMath::Clamp(TargetPosition.X, 0, ParentSize.X - (CursorSize.X * 2));
+	TargetPosition.Y = FMath::Clamp(TargetPosition.Y, 0, ParentSize.Y - (CursorSize.Y * 2));
 
 	CurrentSlot->SetPosition(TargetPosition);
 
@@ -102,7 +113,6 @@ void UUIPlayerCursor::OnOpened(const FGeometry& ParentGeometry, float DeltaTime)
 		if (bOverlap)
 		{
 			AttachToken();
-			bReleasedInteraction = false;
 		}
 	}
 }
@@ -121,15 +131,31 @@ void UUIPlayerCursor::OnPinched(const FGeometry& ParentGeometry, float DeltaTime
 
 	else if(CurrentPawn->GetInteractInput() && bReleasedInteraction)
 	{
-		if (CurrentToken->CanDropToken())
-		{
-			DetachToken();
-			bReleasedInteraction = false;
-		}
+		CurrentToken->TryToDropToken();
 	}
 }
 
 void UUIPlayerCursor::OnPoint(const FGeometry& ParentGeometry, float DeltaTime)
 {
-	
+	if(CurrentPawn == nullptr)
+	{
+		return;
+	}
+
+	if (!CurrentPawn->GetInteractInput())
+	{
+		bReleasedInteraction = true;
+	}
+
+	if (CurrentPawn->GetInteractInput() && bReleasedInteraction)
+	{
+		UUIStockButton* StockButton = Cast<UUIStockButton>(OverlappedButton);
+		if (StockButton == nullptr)
+		{
+			return;
+		}
+
+		StockButton->Click();
+		bReleasedInteraction = false;
+	}
 }

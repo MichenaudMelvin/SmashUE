@@ -38,11 +38,16 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, Category = "Cursor", meta = (BindWidget))
 	TObjectPtr<UWidget> DetectionArea;
 
+	UPROPERTY()
+	TObjectPtr<UWidget> OverlappedButton;
+
 public:
 	void TickCursor(const FGeometry& ParentGeometry, float DeltaTime);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Display")
 	void InitCursor(ACharacterSelectionPawn* TargetPawn, UUIPlayerToken* TargetToken, int PlayerNumber);
+
+	ECursorState GetCursorState() const {return CursorState;}
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Cursor")
 	void SetCursorState(ECursorState NewState);
@@ -52,6 +57,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Token")
 	void DetachToken();
+
+	void SetOverlappedButton(UWidget* TargetWidget) {OverlappedButton = TargetWidget;}
 
 protected:
 	void Move(const FGeometry& ParentGeometry, float DeltaTime);

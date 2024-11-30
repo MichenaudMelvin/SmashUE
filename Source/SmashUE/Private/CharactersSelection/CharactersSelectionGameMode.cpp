@@ -5,6 +5,7 @@
 #include "LocalMultiplayerSettings.h"
 #include "LocalMultiplayerSubsystem.h"
 #include "Animation/SkeletalMeshActor.h"
+#include "Arena/ArenaSettings.h"
 #include "CharactersSelection/CharacterSelectionPawn.h"
 #include "CharactersSelection/CharacterSelectionSettings.h"
 #include "CharactersSelection/CharacterSelectionInputData.h"
@@ -80,4 +81,15 @@ void ACharactersSelectionGameMode::SpawnPawns(int PawnNumber)
 		NewPawn->AutoPossessPlayer = static_cast<EAutoReceiveInput::Type>(i + 1); // 0 is disabled
 		NewPawn->FinishSpawning(FTransform::Identity);
 	}
+}
+
+void ACharactersSelectionGameMode::LaunchGame()
+{
+	const UArenaSettings* Settings = GetDefault<UArenaSettings>();
+	if (Settings == nullptr)
+	{
+		return;
+	}
+
+	UGameplayStatics::OpenLevelBySoftObjectPtr(this, Settings->ArenaLevel);
 }

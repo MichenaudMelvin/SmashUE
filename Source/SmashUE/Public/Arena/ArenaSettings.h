@@ -14,19 +14,6 @@ class SMASHUE_API UArenaSettings : public UDeveloperSettings
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(Config, EditDefaultsOnly, Category = "Characters")
-	TSubclassOf<ASmashCharacter> SmashCharacterClassP0;
-
-	UPROPERTY(Config, EditDefaultsOnly, Category = "Characters")
-	TSubclassOf<ASmashCharacter> SmashCharacterClassP1;
-
-	UPROPERTY(Config, EditDefaultsOnly, Category = "Characters")
-	TSubclassOf<ASmashCharacter> SmashCharacterClassP2;
-
-	UPROPERTY(Config, EditDefaultsOnly, Category = "Characters")
-	TSubclassOf<ASmashCharacter> SmashCharacterClassP3;
-
-	//Temp
-	UPROPERTY(Config, EditDefaultsOnly, Category = "TEMP", meta = (UIMin = 1, UIMax = 4, ClampMin = 1, ClampMax = 4, ToolTip = "TempVariable"))
-	int NumbersOfPlayers = 4;
+	UPROPERTY(Config, EditDefaultsOnly, Category = "World")
+	TSoftObjectPtr<UWorld> ArenaLevel;
 };
