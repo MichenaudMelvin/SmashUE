@@ -61,6 +61,8 @@ protected:
 public:
 	void InitEnergyBall(const FEnergyBallData& EnergyBallData);
 
+	void UpdateEnergyBallData(const FEnergyBallData& EnergyBallData);
+
 	void ChargeEnergy(float DeltaTime);
 
 	void CompleteCharge();

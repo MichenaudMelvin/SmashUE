@@ -4,6 +4,7 @@
 #include "Characters/Jammus/JammusStateNeutralSA.h"
 #include "Characters/SmashCharacter.h"
 #include "Characters/SmashCharacterStateMachine.h"
+#include "Components/CapsuleComponent.h"
 
 void UJammusStateNeutralSA::StateInit(USmashCharacterStateMachine* InStateMachine)
 {
@@ -42,6 +43,11 @@ void UJammusStateNeutralSA::StateEnter(ESmashCharacterStateID PreviousStateID)
 
 	if(CurrentEnergyBall != nullptr)
 	{
+		// quick fix to avoid jammus hitting herself (at start only, if she is too fast she still can hit the ball by herself)
+		FVector WorldLocation = Character->GetActorLocation() + (Character->GetActorForwardVector() * TargetEnergyBallData.ThrowDirection * Character->GetCapsuleComponent()->GetUnscaledCapsuleRadius());
+		CurrentEnergyBall->SetActorLocation(WorldLocation);
+
+		CurrentEnergyBall->UpdateEnergyBallData(TargetEnergyBallData);
 		CurrentEnergyBall->SetEnergyBallState(EEnergyBallState::Throwing);
 		CurrentEnergyBall = nullptr;
 		StateMachine->ChangeState(ESmashCharacterStateID::Idle);

@@ -90,7 +90,7 @@ void UUICharacterSelection::NativeOnInitialized()
 		}
 
 		PreviewPanels.Add(PreviewPanel);
-		PreviewPanel->OnPanelToggleState.AddDynamic(this, &UUICharacterSelection::SetReadyPanelVisibility);
+		PreviewPanel->OnPanelToggleState.AddDynamic(this, &UUICharacterSelection::UpdateReadyPanelVisibility);
 	}
 }
 
@@ -111,6 +111,7 @@ void UUICharacterSelection::AddPlayer(int ElementsIndex)
 
 	Cursors[ElementsIndex]->SetVisibility(ESlateVisibility::Visible);
 	Tokens[ElementsIndex]->SetVisibility(ESlateVisibility::Visible);
+	UpdateReadyPanelVisibility();
 }
 
 void UUICharacterSelection::CursorTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -163,6 +164,7 @@ void UUICharacterSelection::CheckCharactersReadyState()
 			continue;
 		}
 
+		// feedback to check if players are ready
 		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Yellow,FString::Printf(TEXT("%d: %s"), i, (CurrentPawn->IsReady() ? TEXT("Ready") : TEXT("Waiting"))));
 
 		if (!CurrentPanel->IsPanelEnabled() || !CurrentPawn->IsReady())
@@ -231,7 +233,7 @@ void UUICharacterSelection::DisablePanel(int PlayerIndex)
 	PreviewPanels[PlayerIndex]->UpdatePreviewPanel(NAME_None);
 }
 
-void UUICharacterSelection::SetReadyPanelVisibility()
+void UUICharacterSelection::UpdateReadyPanelVisibility()
 {
 	ULocalMultiplayerSubsystem* Subsystem = GetGameInstance()->GetSubsystem<ULocalMultiplayerSubsystem>();
 

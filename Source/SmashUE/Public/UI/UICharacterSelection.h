@@ -117,7 +117,7 @@ protected:
 	TObjectPtr<UPanelWidget> ReadyPanel;
 
 	UFUNCTION()
-	void SetReadyPanelVisibility();
+	void UpdateReadyPanelVisibility();
 
 #pragma endregion
 };

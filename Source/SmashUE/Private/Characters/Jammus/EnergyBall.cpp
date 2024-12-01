@@ -2,9 +2,7 @@
 
 
 #include "Characters/Jammus/EnergyBall.h"
-
 #include "Kismet/KismetMathLibrary.h"
-
 
 AEnergyBall::AEnergyBall()
 {
@@ -56,12 +54,17 @@ void AEnergyBall::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyC
 void AEnergyBall::InitEnergyBall(const FEnergyBallData& EnergyBallData)
 {
 	SetEnergyBallState(EEnergyBallState::Charging);
-	CurrentData = EnergyBallData;
+	UpdateEnergyBallData(EnergyBallData);
 
 	FVector TargetMeshScale(MeshScale.GetLowerBoundValue());
 	EnergyBallMesh->SetWorldScale3D(TargetMeshScale);
 
 	ChargingDuration = 0.0f;
+}
+
+void AEnergyBall::UpdateEnergyBallData(const FEnergyBallData& EnergyBallData)
+{
+	CurrentData = EnergyBallData;
 }
 
 void AEnergyBall::ChargeEnergy(float DeltaTime)
